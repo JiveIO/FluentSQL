@@ -2,12 +2,21 @@
 
 SQL Builder
 
-Reference https://www.w3schools.com/sql/sql_syntax.asp
+Reference 
+
+    https://www.sqltutorial.org/
+    https://learnsql.com/
+    https://www.w3schools.com/sql/sql_syntax.asp
+
+Group 1
 
     Query: SELECT - extracts data from a database
+        SQL Joins, SQL UNION, SQL GROUP BY, SQL HAVING, SQL CASE
     Modify: UPDATE - updates data in a database
     Drop: DELETE - deletes data from a database
     Add: INSERT INTO - inserts new data into a database
+
+Group 2
 
     CREATE DATABASE - creates a new database
     ALTER DATABASE - modifies a database
@@ -16,7 +25,6 @@ Reference https://www.w3schools.com/sql/sql_syntax.asp
     DROP TABLE - deletes a table
     CREATE INDEX - creates an index (search key)
     DROP INDEX - deletes an index
-
 
 # Query: SELECT - extracts data from a database
 

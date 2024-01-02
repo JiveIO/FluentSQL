@@ -33,7 +33,7 @@ func (qb *QueryBuilder) Select(columns ...any) *QueryBuilder {
 }
 
 // From builder
-func (qb *QueryBuilder) From(table string, alias ...string) *QueryBuilder {
+func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
 	qb.Query.From.Table = table
 
 	// Table alias
@@ -50,6 +50,28 @@ func (qb *QueryBuilder) Where(Field string, Opt WhereOpt, Value any) *QueryBuild
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
+		AndOr: And,
+	})
+
+	return qb
+}
+
+// WhereNull builder
+func (qb *QueryBuilder) WhereNull(Field string) *QueryBuilder {
+	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
+		Field: Field,
+		Opt:   Null,
+		AndOr: And,
+	})
+
+	return qb
+}
+
+// WhereNotNull builder
+func (qb *QueryBuilder) WhereNotNull(Field string) *QueryBuilder {
+	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
+		Field: Field,
+		Opt:   NotNull,
 		AndOr: And,
 	})
 
@@ -82,6 +104,13 @@ func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBui
 	}
 
 	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, cond)
+
+	return qb
+}
+
+// OrderBy builder
+func (qb *QueryBuilder) OrderBy(field string, dir OrderByDir) *QueryBuilder {
+	qb.Query.OrderBy.Append(field, dir)
 
 	return qb
 }
