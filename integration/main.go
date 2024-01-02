@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	qb "github.com/JiveCode/fluentsql"
+	qb "github.com/JiveIO/FluentSQL"
 	"time"
 )
 
