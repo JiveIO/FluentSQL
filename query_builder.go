@@ -8,22 +8,6 @@ type QueryBuilder struct {
 	Query Query
 }
 
-type SelectBuilder struct {
-	QueryBuilder
-}
-
-type FromBuilder struct {
-	QueryBuilder
-}
-
-type WhereBuilder struct {
-	QueryBuilder
-}
-
-type LimitBuilder struct {
-	QueryBuilder
-}
-
 // NewQueryBuilder Query builder constructor
 func NewQueryBuilder() *QueryBuilder {
 	return &QueryBuilder{
@@ -41,84 +25,73 @@ func (qb *QueryBuilder) String() string {
 }
 
 // Select builder
-func (qb *QueryBuilder) Select(columns ...any) *SelectBuilder {
-	_qb := &SelectBuilder{*qb}
+func (qb *QueryBuilder) Select(columns ...any) *QueryBuilder {
 
-	_qb.Query.Select.Columns = columns
+	qb.Query.Select.Columns = columns
 
-	return _qb
+	return qb
 }
 
 // From builder
-func (qb *QueryBuilder) From(table string, alias ...string) *FromBuilder {
-	_qb := &FromBuilder{*qb}
-
-	_qb.Query.From.Table = table
+func (qb *QueryBuilder) From(table string, alias ...string) *QueryBuilder {
+	qb.Query.From.Table = table
 
 	// Table alias
 	if len(alias) > 0 {
-		_qb.Query.From.Alias = alias[0]
+		qb.Query.From.Alias = alias[0]
 	}
 
-	return _qb
+	return qb
 }
 
 // Where builder
-func (qb *QueryBuilder) Where(Field string, Opt WhereOpt, Value any) *WhereBuilder {
-	_qb := &WhereBuilder{*qb}
-
-	_qb.Query.Where.Conditions = append(_qb.Query.Where.Conditions, Condition{
+func (qb *QueryBuilder) Where(Field string, Opt WhereOpt, Value any) *QueryBuilder {
+	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
 		AndOr: And,
 	})
 
-	return _qb
+	return qb
 }
 
 // WhereOr builder
-func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *WhereBuilder {
-	_qb := &WhereBuilder{*qb}
-
-	_qb.Query.Where.Conditions = append(_qb.Query.Where.Conditions, Condition{
+func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *QueryBuilder {
+	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
 		AndOr: Or,
 	})
 
-	return _qb
+	return qb
 }
 
-type FnWhereGroupBuilder func(query WhereBuilder) *WhereBuilder
+type FnWhereGroupBuilder func(query QueryBuilder) *QueryBuilder
 
 // WhereGroup combine multi where conditions into a group.
 // Example: Group 2 condition created_at and update_at.
 // SQL> SELECT * FROM users WHERE first_name LIKE '%john%' AND (created_at > '2024-01-12' OR update_at >= '2024-01-12') LIMIT 10 OFFSET 0
-func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *WhereBuilder {
-	_qb := &WhereBuilder{*qb}
-
+func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBuilder {
 	// Create new WhereBuilder
-	whereBuilder := groupCondition(WhereBuilder{*NewQueryBuilder()})
+	whereBuilder := groupCondition(*NewQueryBuilder())
 
 	cond := Condition{
 		Group: whereBuilder.Query.Where.Conditions,
 	}
 
-	_qb.Query.Where.Conditions = append(_qb.Query.Where.Conditions, cond)
+	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, cond)
 
-	return _qb
+	return qb
 }
 
 // Limit builder
-func (qb *QueryBuilder) Limit(Limit, Offset int) *LimitBuilder {
-	_qb := &LimitBuilder{*qb}
+func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
+	qb.Query.Limit.Limit = Limit
+	qb.Query.Limit.Offset = Offset
 
-	_qb.Query.Limit.Limit = Limit
-	_qb.Query.Limit.Offset = Offset
-
-	return _qb
+	return qb
 }
 
 // AS of query builder
