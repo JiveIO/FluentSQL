@@ -221,17 +221,19 @@ func (c *Condition) String() string {
 		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), c.Value.(BetweenValue).String())
 	}
 
+	// WHERE salary = (SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 1 , 1);
+	// WHERE CustomerID IN (SELECT CustomerID FROM Orders);
+	// WHERE CustomerID NOT IN (SELECT CustomerID FROM Orders);
 	// WHERE EXISTS (SELECT ProductName FROM Products);
 	// WHERE NOT EXISTS (SELECT ProductName FROM Products);
-	// WHERE CustomerID NOT IN (SELECT CustomerID FROM Orders);
-	// WHERE CustomerID IN (SELECT CustomerID FROM Orders);
 	// WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 	// WHERE ProductID > ALL (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 	if _, ok := c.Value.(*QueryBuilder); ok { // Column type is a complex query.
 		selectQuery := c.Value.(*QueryBuilder).String()
 
-		if c.Opt == In || c.Opt == NotIn || c.Opt == Exists || c.Opt == NotExists ||
-			c.Opt == EqAny || c.Opt == NotEqAny || c.Opt == DiffAny || c.Opt == GreaterAny || c.Opt == LesserAny || c.Opt == GrEqAny || c.Opt == LeEqAny {
+		if c.Opt == Eq || c.Opt == In || c.Opt == NotIn || c.Opt == Exists || c.Opt == NotExists ||
+			c.Opt == EqAny || c.Opt == NotEqAny || c.Opt == DiffAny || c.Opt == GreaterAny || c.Opt == LesserAny || c.Opt == GrEqAny || c.Opt == LeEqAny ||
+			c.Opt == EqAll || c.Opt == NotEqAll || c.Opt == DiffAll || c.Opt == GreaterAll || c.Opt == LesserAll || c.Opt == GrEqAll || c.Opt == LeEqAll {
 			return fmt.Sprintf("%s %s (%s)", c.Field, c.opt(), selectQuery)
 		}
 	}

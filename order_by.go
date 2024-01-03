@@ -48,10 +48,9 @@ func (o *OrderBy) String() string {
 	}
 
 	var orderItems []string
-	orderItems = append(orderItems, "ORDER BY")
 	for _, item := range o.Items {
 		orderItems = append(orderItems, fmt.Sprintf("%s %s", item.Field, item.Dir()))
 	}
 
-	return strings.Join(orderItems, " ")
+	return fmt.Sprintf("ORDER BY %s", strings.Join(orderItems, ", "))
 }
