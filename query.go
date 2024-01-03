@@ -11,6 +11,7 @@ type Query struct {
 	Select  Select
 	From    From
 	Where   Where
+	GroupBy GroupBy
 	OrderBy OrderBy
 	Limit   Limit
 	Fetch   Fetch // A version of Limit
@@ -25,6 +26,11 @@ func (q *Query) String() string {
 	whereSql := q.Where.String()
 	if whereSql != "" {
 		query = append(query, whereSql)
+	}
+
+	groupSql := q.GroupBy.String()
+	if groupSql != "" {
+		query = append(query, groupSql)
 	}
 
 	orderBySql := q.OrderBy.String()

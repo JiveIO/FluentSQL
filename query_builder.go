@@ -108,6 +108,13 @@ func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBui
 	return qb
 }
 
+// GroupBy fields in a query
+func (qb *QueryBuilder) GroupBy(fields ...string) *QueryBuilder {
+	qb.Query.GroupBy.Append(fields...)
+
+	return qb
+}
+
 // OrderBy builder
 func (qb *QueryBuilder) OrderBy(field string, dir OrderByDir) *QueryBuilder {
 	qb.Query.OrderBy.Append(field, dir)

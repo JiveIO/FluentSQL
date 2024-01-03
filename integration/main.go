@@ -240,20 +240,19 @@ func main() {
 		String()
 	fmt.Println("SQL> ", sql)
 
-	//sql = qb.NewQueryBuilder().
-	//	Select("employee_id", "first_name", "last_name", "salary").
-	//	From("employees").
-	//	Where("salary", qb.GreaterAny,
-	//		qb.NewQueryBuilder().
-	//			Select("AVG(salary)").
-	//			From("employees").
-	//			// TODO Group By
-	//			GroupBy("department_id"),
-	//	).
-	//	OrderBy("first_name", qb.Asc).
-	//	OrderBy("last_name", qb.Asc).
-	//	String()
-	//fmt.Println("SQL> ", sql)
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.GreaterAny,
+			qb.NewQueryBuilder().
+				Select("AVG(salary)").
+				From("employees").
+				GroupBy("department_id"),
+		).
+		OrderBy("first_name", qb.Asc).
+		OrderBy("last_name", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
 
 	// EXISTS
 	sql = qb.NewQueryBuilder().
