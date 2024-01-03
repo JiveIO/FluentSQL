@@ -123,6 +123,14 @@ func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
 	return qb
 }
 
+// Fetch builder
+func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
+	qb.Query.Fetch.Offset = Offset
+	qb.Query.Fetch.Fetch = Fetch
+
+	return qb
+}
+
 // AS of query builder
 // Need for case build SELECT query which the column from another SELECT
 // Example: Count number product for each category.

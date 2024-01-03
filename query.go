@@ -13,6 +13,7 @@ type Query struct {
 	Where   Where
 	OrderBy OrderBy
 	Limit   Limit
+	Fetch   Fetch // A version of Limit
 }
 
 func (q *Query) String() string {
@@ -34,6 +35,11 @@ func (q *Query) String() string {
 	limitSql := q.Limit.String()
 	if limitSql != "" {
 		query = append(query, limitSql)
+	}
+
+	fetchSql := q.Fetch.String()
+	if fetchSql != "" {
+		query = append(query, fetchSql)
 	}
 
 	sql := strings.Join(query, " ")

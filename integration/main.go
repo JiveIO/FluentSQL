@@ -123,4 +123,22 @@ func main() {
 		String()
 
 	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		OrderBy("salary", qb.Desc).
+		Fetch(0, 1).
+		String()
+
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		OrderBy("salary", qb.Desc).
+		Fetch(5, 5).
+		String()
+
+	fmt.Println("SQL> ", sql)
 }
