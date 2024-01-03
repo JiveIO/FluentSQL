@@ -82,12 +82,18 @@ const (
 
 // BetweenValue for WhereOpt.Between or WhereOpt.NotBetween
 type BetweenValue struct {
-	From any
-	To   any
+	Low  any
+	High any
 }
 
 func (v BetweenValue) String() string {
-	return fmt.Sprintf("%v AND %v", v.From, v.To)
+	if _, ok := v.Low.(string); ok {
+		// hire_date BETWEEN '1999-01-01' AND '2000-12-31'
+		return fmt.Sprintf("'%v' AND '%v'", v.Low, v.High)
+	}
+
+	//  salary NOT BETWEEN 2500 AND 2900
+	return fmt.Sprintf("%v AND %v", v.Low, v.High)
 }
 
 // FieldValue to handle condition `WHERE c.column <WhereOpt> c.column_1`

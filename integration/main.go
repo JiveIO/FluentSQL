@@ -161,7 +161,8 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "hire_date").
 		From("employees").
-		Where("YEAR (hire_date)", qb.Eq, 1999).
+		//Where("YEAR (hire_date)", qb.Eq, 1999). // MySQL
+		Where("DATE_PART('year', hire_date)", qb.Eq, 1999). // PostgreSQL
 		OrderBy("hire_date", qb.Desc).
 		String()
 	fmt.Println("SQL> ", sql)
@@ -204,8 +205,8 @@ func main() {
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees").
 		Where("salary", qb.Between, qb.BetweenValue{
-			From: 9000,
-			To:   12000,
+			Low:  9000,
+			High: 12000,
 		}).
 		OrderBy("salary", qb.Asc).
 		String()
@@ -254,7 +255,6 @@ func main() {
 		String()
 	fmt.Println("SQL> ", sql)
 
-	// EXISTS
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees", " e").
@@ -266,6 +266,64 @@ func main() {
 		).
 		OrderBy("first_name", qb.Asc).
 		OrderBy("last_name", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.Between, qb.BetweenValue{
+			Low:  2500,
+			High: 2900,
+		}).
+		OrderBy("salary", qb.Desc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.NotBetween, qb.BetweenValue{
+			Low:  2500,
+			High: 2900,
+		}).
+		OrderBy("salary", qb.Desc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "hire_date").
+		From("employees").
+		Where("hire_date", qb.Between, qb.BetweenValue{
+			Low:  "1999-01-01",
+			High: "2000-12-31",
+		}).
+		OrderBy("hire_date", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "hire_date").
+		From("employees").
+		Where("hire_date", qb.NotBetween, qb.BetweenValue{
+			Low:  "1989-01-01",
+			High: "1992-12-31",
+		}).
+		OrderBy("hire_date", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		//Select("employee_id", "first_name", "last_name", "YEAR(hire_date) joined_year"). // MySQL
+		Select("employee_id", "first_name", "last_name", "DATE_PART('year', hire_date) joined_year"). // PostgreSQL
+		From("employees").
+		//Where("YEAR(hire_date)", // MySQL
+		Where("DATE_PART('year', hire_date)", // PostgreSQL
+			qb.Between, qb.BetweenValue{
+				Low:  1990,
+				High: 1993,
+			}).
+		OrderBy("hire_date", qb.Asc).
 		String()
 	fmt.Println("SQL> ", sql)
 }
