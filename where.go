@@ -90,6 +90,17 @@ func (v BetweenValue) String() string {
 	return fmt.Sprintf("%v AND %v", v.From, v.To)
 }
 
+// FieldValue to handle condition `WHERE c.column <WhereOpt> c.column_1`
+//
+// So, When build condition Where("d.employee_id", qb.Eq, qb.FieldValue("e.employee_id")) to keep SQL string as
+// d.employee_id = e.employee_id instead of
+// d.employee_id = 'e.employee_id'
+type FieldValue string
+
+func (v FieldValue) String() string {
+	return string(v)
+}
+
 func (c *Condition) opt() string {
 	var sign string
 
@@ -238,7 +249,11 @@ func (c *Condition) String() string {
 		}
 	}
 
-	return fmt.Sprintf("%s %s %s", c.Field, c.opt(), c.Value)
+	if _, ok := c.Value.(string); ok {
+		return fmt.Sprintf("%s %s '%v'", c.Field, c.opt(), c.Value)
+	}
+
+	return fmt.Sprintf("%s %s %v", c.Field, c.opt(), c.Value)
 }
 
 func (w *Where) String() string {
