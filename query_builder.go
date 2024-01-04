@@ -138,10 +138,11 @@ func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
 	return qb
 }
 
-// AS of query builder
-// Need for case build SELECT query which the column from another SELECT
-// Example: Count number product for each category.
-// SQL> SELECT s.name, (SELECT COUNT(*) FROM product AS p WHERE p.store_id=s.id) FROM store AS s
+// AS to create an alias of query builder,
+//
+// Examples:
+// SELECT s.name, (SELECT COUNT(*) FROM product AS p WHERE p.store_id=s.id) AS counter FROM store AS s
+// SELECT p.* FROM (SELECT first_name, last_name FROM Customers) AS p;
 func (qb *QueryBuilder) AS(alias string) *QueryBuilder {
 	qb.Query.Alias = alias
 

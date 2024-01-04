@@ -16,15 +16,18 @@ func (f *From) String() string {
 
 	if _, ok := f.Table.(string); ok { // Table type string
 		sb.WriteString(fmt.Sprintf("FROM %s", f.Table))
-
-		if f.Alias != "" {
-			sb.WriteString(" " + f.Alias)
-		}
 	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is a complex query.
-		// Example: SELECT Count(*) AS DistinctCountries FROM (SELECT DISTINCT Country FROM Customers);
 		selectQuery := f.Table.(*QueryBuilder).String()
 
-		sb.WriteString(fmt.Sprintf("FROM (%s)", selectQuery))
+		if f.Table.(*QueryBuilder).Query.Alias == "" {
+			sb.WriteString(fmt.Sprintf("FROM (%s)", selectQuery))
+		} else {
+			sb.WriteString(fmt.Sprintf("FROM %s", selectQuery))
+		}
+	}
+
+	if f.Alias != "" {
+		sb.WriteString(" " + f.Alias)
 	}
 
 	return sb.String()

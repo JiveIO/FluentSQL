@@ -7,7 +7,7 @@ import (
 
 // Query type struct
 type Query struct {
-	Alias   string
+	Alias   string // Query alias `AS <alias>
 	Select  Select
 	From    From
 	Where   Where

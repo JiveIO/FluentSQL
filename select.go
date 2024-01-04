@@ -21,8 +21,11 @@ func (s *Select) String() string {
 			if _, ok := col.(string); ok { // Column type string
 				columns = append(columns, col.(string))
 			} else if _, ok := col.(*QueryBuilder); ok { // Column type is a complex query.
-				// Example: SELECT s.name, (SELECT COUNT(*) FROM product AS p WHERE p.store_id=s.id) AS count FROM store AS s
 				selectQuery := col.(*QueryBuilder).String()
+
+				if col.(*QueryBuilder).Query.Alias == "" {
+					selectQuery = fmt.Sprintf("(%s)", selectQuery)
+				}
 
 				columns = append(columns, selectQuery)
 			}

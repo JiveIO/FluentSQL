@@ -124,6 +124,15 @@ func (v FieldEmpty) String() string {
 	return string(v)
 }
 
+// FieldYear to handle conditions
+// Where ("YEAR(hire_date) Between 1990 AND 1993", // MySQL
+// Where ("DATE_PART('year', hire_date) Between 1990 AND 1993", // PostgreSQL
+type FieldYear string
+
+func (v FieldYear) String() string {
+	return fmt.Sprintf("DATE_PART('year', %s)", string(v))
+}
+
 func (c *Condition) opt() string {
 	var sign string
 

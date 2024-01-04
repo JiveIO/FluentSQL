@@ -414,11 +414,9 @@ func toSQLBetween() {
 	fmt.Println("SQL> ", sql)
 
 	sql = qb.NewQueryBuilder().
-		//Select("employee_id", "first_name", "last_name", "YEAR(hire_date) joined_year"). // MySQL
-		Select("employee_id", "first_name", "last_name", "DATE_PART('year', hire_date) joined_year"). // PostgreSQL
+		Select("employee_id", "first_name", "last_name", qb.FieldYear("hire_date")+" joined_year").
 		From("employees").
-		//Where("YEAR(hire_date)", // MySQL
-		Where("DATE_PART('year', hire_date)", // PostgreSQL
+		Where(qb.FieldYear("hire_date"),
 			qb.Between, qb.ValueBetween{
 				Low:  1990,
 				High: 1993,
