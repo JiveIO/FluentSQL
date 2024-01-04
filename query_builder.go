@@ -46,7 +46,7 @@ func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
 
 // Where builder
 func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
+	qb.Query.Where.Append(Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
@@ -56,31 +56,9 @@ func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder 
 	return qb
 }
 
-// WhereNull builder
-func (qb *QueryBuilder) WhereNull(Field string) *QueryBuilder {
-	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
-		Field: Field,
-		Opt:   Null,
-		AndOr: And,
-	})
-
-	return qb
-}
-
-// WhereNotNull builder
-func (qb *QueryBuilder) WhereNotNull(Field string) *QueryBuilder {
-	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
-		Field: Field,
-		Opt:   NotNull,
-		AndOr: And,
-	})
-
-	return qb
-}
-
 // WhereOr builder
 func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
+	qb.Query.Where.Append(Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,

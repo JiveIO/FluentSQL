@@ -11,6 +11,37 @@ type Where struct {
 	Conditions []Condition
 }
 
+func (w *Where) Append(conditions ...Condition) {
+	w.Conditions = append(w.Conditions, conditions...)
+}
+
+func (w *Where) String() string {
+	var conditions []string
+
+	if len(w.Conditions) > 0 {
+		for _, cond := range w.Conditions {
+			var _condition = cond.String()
+
+			if cond.AndOr == Or && len(conditions) > 0 {
+				_orCondition := fmt.Sprint(" OR ", _condition)
+
+				last := len(conditions) - 1
+
+				conditions[last] = conditions[last] + _orCondition
+			} else {
+				conditions = append(conditions, _condition)
+			}
+		}
+	}
+
+	// No WHERE condition
+	if len(conditions) == 0 {
+		return ""
+	}
+
+	return fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND "))
+}
+
 // Condition type struct
 type Condition struct {
 	// Field name of column type string | FieldNot
@@ -24,13 +55,6 @@ type Condition struct {
 	// Group conditions in parentheses `()`.
 	Group []Condition
 }
-
-type WhereAndOr int
-
-const (
-	And WhereAndOr = iota
-	Or
-)
 
 func (c *Condition) andOr() string {
 	var sign string
@@ -80,58 +104,6 @@ const (
 	GrEqAll
 	LeEqAll
 )
-
-// ValueBetween for WhereOpt.Between or WhereOpt.NotBetween
-type ValueBetween struct {
-	Low  any
-	High any
-}
-
-func (v ValueBetween) String() string {
-	if _, ok := v.Low.(string); ok {
-		// hire_date BETWEEN '1999-01-01' AND '2000-12-31'
-		return fmt.Sprintf("'%v' AND '%v'", v.Low, v.High)
-	}
-
-	//  salary NOT BETWEEN 2500 AND 2900
-	return fmt.Sprintf("%v AND %v", v.Low, v.High)
-}
-
-// ValueField to handle condition `WHERE c.column <WhereOpt> c.column_1`
-//
-// So, When build condition Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")) to keep SQL string as
-// d.employee_id = e.employee_id instead of
-// d.employee_id = 'e.employee_id'
-type ValueField string
-
-func (v ValueField) String() string {
-	return string(v)
-}
-
-// FieldNot to handle condition `WHERE NOT salary > 5000`
-//
-// So, When build condition Where(qb.FieldNot("salary"), qb.Greater, 5000) to keep SQL string as `NOT salary > 5000`
-type FieldNot string
-
-func (v FieldNot) String() string {
-	return fmt.Sprintf("NOT %s", string(v))
-}
-
-// FieldEmpty to handle condition `WHERE NOT EXISTS (SELECT employee_id FROM dependents)`
-type FieldEmpty string
-
-func (v FieldEmpty) String() string {
-	return string(v)
-}
-
-// FieldYear to handle conditions
-// Where ("YEAR(hire_date) Between 1990 AND 1993", // MySQL
-// Where ("DATE_PART('year', hire_date) Between 1990 AND 1993", // PostgreSQL
-type FieldYear string
-
-func (v FieldYear) String() string {
-	return fmt.Sprintf("DATE_PART('year', %s)", string(v))
-}
 
 func (c *Condition) opt() string {
 	var sign string
@@ -263,7 +235,7 @@ func (c *Condition) String() string {
 	// WHERE ProductName NOT BETWEEN 'Carnation Tigers' AND 'Mozzarella di Giovanni'
 	// WHERE Price BETWEEN 10 AND 20
 	if c.Opt == Between || c.Opt == NotBetween {
-		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), c.Value.(ValueBetween).String())
+		return fmt.Sprintf("%s %s %v", c.Field, c.opt(), c.Value)
 	}
 
 	// WHERE salary = (SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 1 , 1);
@@ -274,13 +246,7 @@ func (c *Condition) String() string {
 	// WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 	// WHERE ProductID > ALL (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 	if _, ok := c.Value.(*QueryBuilder); ok { // Column type is a complex query.
-		selectQuery := c.Value.(*QueryBuilder).String()
-
-		if c.Opt == Eq || c.Opt == In || c.Opt == NotIn || c.Opt == Exists || c.Opt == NotExists ||
-			c.Opt == EqAny || c.Opt == NotEqAny || c.Opt == DiffAny || c.Opt == GreaterAny || c.Opt == LesserAny || c.Opt == GrEqAny || c.Opt == LeEqAny ||
-			c.Opt == EqAll || c.Opt == NotEqAll || c.Opt == DiffAll || c.Opt == GreaterAll || c.Opt == LesserAll || c.Opt == GrEqAll || c.Opt == LeEqAll {
-			return fmt.Sprintf("%s %s (%s)", c.Field, c.opt(), selectQuery)
-		}
+		return fmt.Sprintf("%s %s (%v)", c.Field, c.opt(), c.Value)
 	}
 
 	if _, ok := c.Value.(string); ok {
@@ -290,29 +256,61 @@ func (c *Condition) String() string {
 	return fmt.Sprintf("%s %s %v", c.Field, c.opt(), c.Value)
 }
 
-func (w *Where) String() string {
-	var conditions []string
+type WhereAndOr int
 
-	if len(w.Conditions) > 0 {
-		for _, cond := range w.Conditions {
-			var _condition = cond.String()
+const (
+	And WhereAndOr = iota
+	Or
+)
 
-			if cond.AndOr == Or && len(conditions) > 0 {
-				_orCondition := fmt.Sprint(" OR ", _condition)
+// ValueBetween for WhereOpt.Between or WhereOpt.NotBetween
+type ValueBetween struct {
+	Low  any
+	High any
+}
 
-				last := len(conditions) - 1
-
-				conditions[last] = conditions[last] + _orCondition
-			} else {
-				conditions = append(conditions, _condition)
-			}
-		}
+func (v ValueBetween) String() string {
+	if _, ok := v.Low.(string); ok {
+		// hire_date BETWEEN '1999-01-01' AND '2000-12-31'
+		return fmt.Sprintf("'%v' AND '%v'", v.Low, v.High)
 	}
 
-	// No WHERE condition
-	if len(conditions) == 0 {
-		return ""
-	}
+	//  salary NOT BETWEEN 2500 AND 2900
+	return fmt.Sprintf("%v AND %v", v.Low, v.High)
+}
 
-	return fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND "))
+// ValueField to handle condition `WHERE c.column <WhereOpt> c.column_1`
+//
+// So, When build condition Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")) to keep SQL string as
+// d.employee_id = e.employee_id instead of
+// d.employee_id = 'e.employee_id'
+type ValueField string
+
+func (v ValueField) String() string {
+	return string(v)
+}
+
+// FieldNot to handle condition `WHERE NOT salary > 5000`
+//
+// So, When build condition Where(qb.FieldNot("salary"), qb.Greater, 5000) to keep SQL string as `NOT salary > 5000`
+type FieldNot string
+
+func (v FieldNot) String() string {
+	return fmt.Sprintf("NOT %s", string(v))
+}
+
+// FieldEmpty to handle condition `WHERE NOT EXISTS (SELECT employee_id FROM dependents)`
+type FieldEmpty string
+
+func (v FieldEmpty) String() string {
+	return string(v)
+}
+
+// FieldYear to handle conditions
+// Where ("YEAR(hire_date) Between 1990 AND 1993", // MySQL
+// Where ("DATE_PART('year', hire_date) Between 1990 AND 1993", // PostgreSQL
+type FieldYear string
+
+func (v FieldYear) String() string {
+	return fmt.Sprintf("DATE_PART('year', %s)", string(v))
 }

@@ -10,102 +10,9 @@ import (
 func main() {
 	start := time.Now()
 
-	//toSQLBetween()
-
 	var sql string
 
-	// ------------- IN | NOT IN -------------
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "job_id").
-		From("employees").
-		Where("job_id", qb.In, []int{8, 9, 10}).
-		OrderBy("job_id", qb.Asc).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "job_id").
-		From("employees").
-		Where("job_id", qb.NotIn, []int{7, 8, 9}).
-		OrderBy("job_id", qb.Asc).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "salary").
-		From("employees").
-		Where("department_id", qb.In,
-			qb.NewQueryBuilder().
-				Select("department_id").
-				From("departments").
-				Where("department_name", qb.Eq, "Marketing").
-				WhereOr("department_name", qb.Eq, "Sales"),
-		).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	// ------------- LIKE | NOT LIKE -------------
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name").
-		From("employees").
-		Where("first_name", qb.Like, "S%").
-		Where("first_name", qb.NotLike, "Sh%").
-		OrderBy("first_name", qb.Asc).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	// ------------- IS NULL | IS NOT NUL -------------
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "phone_number").
-		From("employees").
-		WhereNull("phone_number").
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "phone_number").
-		From("employees").
-		WhereNotNull("phone_number").
-		String()
-	fmt.Println("SQL> ", sql)
-
-	// ------------- NOT -------------
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "salary").
-		From("employees").
-		Where("department_id", qb.Eq, 5).
-		Where(qb.FieldNot("salary"), qb.Greater, 5000).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "salary").
-		From("employees").
-		Where("salary", qb.NotBetween, qb.ValueBetween{Low: 3000, High: 5000}).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name").
-		From("employees", "e").
-		Where(qb.FieldEmpty(""), qb.NotExists,
-			qb.NewQueryBuilder().
-				Select("employee_id").
-				From("dependents", "d").
-				Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")),
-		).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	// ------------- Alias -------------
-
-	elapsed := time.Since(start)
-	log.Printf("Binomial took %s", elapsed)
-}
-
-func toSQLBetween() {
-	var sql string
-
+	// ------------- COMMON -------------
 	sql = qb.NewQueryBuilder().
 		Select().
 		From("employees").
@@ -270,7 +177,7 @@ func toSQLBetween() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "phone_number").
 		From("employees").
-		WhereNull("phone_number").
+		Where("phone_number", qb.Null, nil).
 		String()
 	fmt.Println("SQL> ", sql)
 
@@ -302,17 +209,6 @@ func toSQLBetween() {
 	fmt.Println("SQL> ", sql)
 
 	sql = qb.NewQueryBuilder().
-		Select("employee_id", "first_name", "last_name", "salary").
-		From("employees").
-		Where("salary", qb.Between, qb.ValueBetween{
-			Low:  9000,
-			High: 12000,
-		}).
-		OrderBy("salary", qb.Asc).
-		String()
-	fmt.Println("SQL> ", sql)
-
-	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "department_id").
 		From("employees").
 		Where("department_id", qb.In, []int{8, 9}).
@@ -328,6 +224,7 @@ func toSQLBetween() {
 		String()
 	fmt.Println("SQL> ", sql)
 
+	// ------------- ALL | ANY -------------
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees").
@@ -355,10 +252,11 @@ func toSQLBetween() {
 		String()
 	fmt.Println("SQL> ", sql)
 
+	// ------------- EXISTS -------------
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees", " e").
-		Where("", qb.Exists,
+		Where(qb.FieldEmpty(""), qb.Exists,
 			qb.NewQueryBuilder().
 				Select("1").
 				From("dependents", "d").
@@ -366,6 +264,18 @@ func toSQLBetween() {
 		).
 		OrderBy("first_name", qb.Asc).
 		OrderBy("last_name", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- BETWEEN | NOT BETWEEN -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.Between, qb.ValueBetween{
+			Low:  9000,
+			High: 12000,
+		}).
+		OrderBy("salary", qb.Asc).
 		String()
 	fmt.Println("SQL> ", sql)
 
@@ -424,4 +334,92 @@ func toSQLBetween() {
 		OrderBy("hire_date", qb.Asc).
 		String()
 	fmt.Println("SQL> ", sql)
+
+	// ------------- IN | NOT IN -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "job_id").
+		From("employees").
+		Where("job_id", qb.In, []int{8, 9, 10}).
+		OrderBy("job_id", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "job_id").
+		From("employees").
+		Where("job_id", qb.NotIn, []int{7, 8, 9}).
+		OrderBy("job_id", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("department_id", qb.In,
+			qb.NewQueryBuilder().
+				Select("department_id").
+				From("departments").
+				Where("department_name", qb.Eq, "Marketing").
+				WhereOr("department_name", qb.Eq, "Sales"),
+		).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- LIKE | NOT LIKE -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name").
+		From("employees").
+		Where("first_name", qb.Like, "S%").
+		Where("first_name", qb.NotLike, "Sh%").
+		OrderBy("first_name", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- IS NULL | IS NOT NUL -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "phone_number").
+		From("employees").
+		Where("phone_number", qb.Null, nil).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "phone_number").
+		From("employees").
+		Where("phone_number", qb.NotNull, nil).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- NOT -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("department_id", qb.Eq, 5).
+		Where(qb.FieldNot("salary"), qb.Greater, 5000).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.NotBetween, qb.ValueBetween{Low: 3000, High: 5000}).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name").
+		From("employees", "e").
+		Where(qb.FieldEmpty(""), qb.NotExists,
+			qb.NewQueryBuilder().
+				Select("employee_id").
+				From("dependents", "d").
+				Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")),
+		).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- Alias -------------
+
+	elapsed := time.Since(start)
+	log.Printf("Binomial took %s", elapsed)
 }
