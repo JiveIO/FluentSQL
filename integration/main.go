@@ -3,10 +3,110 @@ package main
 import (
 	"fmt"
 	qb "github.com/jiveio/fluentsql"
+	"log"
+	"time"
 )
 
 func main() {
-	sql := qb.NewQueryBuilder().
+	start := time.Now()
+
+	//toSQLBetween()
+
+	var sql string
+
+	// ------------- IN | NOT IN -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "job_id").
+		From("employees").
+		Where("job_id", qb.In, []int{8, 9, 10}).
+		OrderBy("job_id", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "job_id").
+		From("employees").
+		Where("job_id", qb.NotIn, []int{7, 8, 9}).
+		OrderBy("job_id", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("department_id", qb.In,
+			qb.NewQueryBuilder().
+				Select("department_id").
+				From("departments").
+				Where("department_name", qb.Eq, "Marketing").
+				WhereOr("department_name", qb.Eq, "Sales"),
+		).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- LIKE | NOT LIKE -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name").
+		From("employees").
+		Where("first_name", qb.Like, "S%").
+		Where("first_name", qb.NotLike, "Sh%").
+		OrderBy("first_name", qb.Asc).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- IS NULL | IS NOT NUL -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "phone_number").
+		From("employees").
+		WhereNull("phone_number").
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "phone_number").
+		From("employees").
+		WhereNotNull("phone_number").
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- NOT -------------
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("department_id", qb.Eq, 5).
+		Where(qb.FieldNot("salary"), qb.Greater, 5000).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name", "salary").
+		From("employees").
+		Where("salary", qb.NotBetween, qb.ValueBetween{Low: 3000, High: 5000}).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	sql = qb.NewQueryBuilder().
+		Select("employee_id", "first_name", "last_name").
+		From("employees", "e").
+		Where(qb.FieldEmpty(""), qb.NotExists,
+			qb.NewQueryBuilder().
+				Select("employee_id").
+				From("dependents", "d").
+				Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")),
+		).
+		String()
+	fmt.Println("SQL> ", sql)
+
+	// ------------- Alias -------------
+
+	elapsed := time.Since(start)
+	log.Printf("Binomial took %s", elapsed)
+}
+
+func toSQLBetween() {
+	var sql string
+
+	sql = qb.NewQueryBuilder().
 		Select().
 		From("employees").
 		String()
@@ -204,7 +304,7 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees").
-		Where("salary", qb.Between, qb.BetweenValue{
+		Where("salary", qb.Between, qb.ValueBetween{
 			Low:  9000,
 			High: 12000,
 		}).
@@ -262,7 +362,7 @@ func main() {
 			qb.NewQueryBuilder().
 				Select("1").
 				From("dependents", "d").
-				Where("d.employee_id", qb.Eq, qb.FieldValue("e.employee_id")),
+				Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")),
 		).
 		OrderBy("first_name", qb.Asc).
 		OrderBy("last_name", qb.Asc).
@@ -272,7 +372,7 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees").
-		Where("salary", qb.Between, qb.BetweenValue{
+		Where("salary", qb.Between, qb.ValueBetween{
 			Low:  2500,
 			High: 2900,
 		}).
@@ -283,7 +383,7 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "salary").
 		From("employees").
-		Where("salary", qb.NotBetween, qb.BetweenValue{
+		Where("salary", qb.NotBetween, qb.ValueBetween{
 			Low:  2500,
 			High: 2900,
 		}).
@@ -294,7 +394,7 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "hire_date").
 		From("employees").
-		Where("hire_date", qb.Between, qb.BetweenValue{
+		Where("hire_date", qb.Between, qb.ValueBetween{
 			Low:  "1999-01-01",
 			High: "2000-12-31",
 		}).
@@ -305,7 +405,7 @@ func main() {
 	sql = qb.NewQueryBuilder().
 		Select("employee_id", "first_name", "last_name", "hire_date").
 		From("employees").
-		Where("hire_date", qb.NotBetween, qb.BetweenValue{
+		Where("hire_date", qb.NotBetween, qb.ValueBetween{
 			Low:  "1989-01-01",
 			High: "1992-12-31",
 		}).
@@ -319,7 +419,7 @@ func main() {
 		From("employees").
 		//Where("YEAR(hire_date)", // MySQL
 		Where("DATE_PART('year', hire_date)", // PostgreSQL
-			qb.Between, qb.BetweenValue{
+			qb.Between, qb.ValueBetween{
 				Low:  1990,
 				High: 1993,
 			}).

@@ -45,7 +45,7 @@ func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
 }
 
 // Where builder
-func (qb *QueryBuilder) Where(Field string, Opt WhereOpt, Value any) *QueryBuilder {
+func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder {
 	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, Condition{
 		Field: Field,
 		Opt:   Opt,

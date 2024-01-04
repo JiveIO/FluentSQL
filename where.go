@@ -13,8 +13,8 @@ type Where struct {
 
 // Condition type struct
 type Condition struct {
-	// Field name of Column
-	Field string
+	// Field name of column type string | FieldNot
+	Field any
 	// Opt condition operators =, <>, >, <, >=, <=, LIKE, IN, NOT IN, BETWEEN
 	Opt WhereOpt
 	// Value data of condition
@@ -56,6 +56,7 @@ const (
 	GrEq
 	LeEq
 	Like
+	NotLike
 	In
 	NotIn
 	Between
@@ -80,13 +81,13 @@ const (
 	LeEqAll
 )
 
-// BetweenValue for WhereOpt.Between or WhereOpt.NotBetween
-type BetweenValue struct {
+// ValueBetween for WhereOpt.Between or WhereOpt.NotBetween
+type ValueBetween struct {
 	Low  any
 	High any
 }
 
-func (v BetweenValue) String() string {
+func (v ValueBetween) String() string {
 	if _, ok := v.Low.(string); ok {
 		// hire_date BETWEEN '1999-01-01' AND '2000-12-31'
 		return fmt.Sprintf("'%v' AND '%v'", v.Low, v.High)
@@ -96,14 +97,30 @@ func (v BetweenValue) String() string {
 	return fmt.Sprintf("%v AND %v", v.Low, v.High)
 }
 
-// FieldValue to handle condition `WHERE c.column <WhereOpt> c.column_1`
+// ValueField to handle condition `WHERE c.column <WhereOpt> c.column_1`
 //
-// So, When build condition Where("d.employee_id", qb.Eq, qb.FieldValue("e.employee_id")) to keep SQL string as
+// So, When build condition Where("d.employee_id", qb.Eq, qb.ValueField("e.employee_id")) to keep SQL string as
 // d.employee_id = e.employee_id instead of
 // d.employee_id = 'e.employee_id'
-type FieldValue string
+type ValueField string
 
-func (v FieldValue) String() string {
+func (v ValueField) String() string {
+	return string(v)
+}
+
+// FieldNot to handle condition `WHERE NOT salary > 5000`
+//
+// So, When build condition Where(qb.FieldNot("salary"), qb.Greater, 5000) to keep SQL string as `NOT salary > 5000`
+type FieldNot string
+
+func (v FieldNot) String() string {
+	return fmt.Sprintf("NOT %s", string(v))
+}
+
+// FieldEmpty to handle condition `WHERE NOT EXISTS (SELECT employee_id FROM dependents)`
+type FieldEmpty string
+
+func (v FieldEmpty) String() string {
 	return string(v)
 }
 
@@ -127,6 +144,8 @@ func (c *Condition) opt() string {
 		sign = "<="
 	case Like:
 		sign = "LIKE"
+	case NotLike:
+		sign = "NOT LIKE"
 	case In:
 		sign = "IN"
 	case NotIn:
@@ -235,7 +254,7 @@ func (c *Condition) String() string {
 	// WHERE ProductName NOT BETWEEN 'Carnation Tigers' AND 'Mozzarella di Giovanni'
 	// WHERE Price BETWEEN 10 AND 20
 	if c.Opt == Between || c.Opt == NotBetween {
-		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), c.Value.(BetweenValue).String())
+		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), c.Value.(ValueBetween).String())
 	}
 
 	// WHERE salary = (SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 1 , 1);
