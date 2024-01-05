@@ -16,7 +16,7 @@ func (f *From) String() string {
 
 	if _, ok := f.Table.(string); ok { // Table type string
 		sb.WriteString(fmt.Sprintf("FROM %s", f.Table))
-	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is a complex query.
+	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is QueryBuilder.
 		selectQuery := f.Table.(*QueryBuilder).String()
 
 		if f.Table.(*QueryBuilder).Query.Alias == "" {

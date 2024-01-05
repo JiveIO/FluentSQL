@@ -1,11 +1,5 @@
 # Fluent SQL
 
-Run 
-
-```bash
-go run integration/main.go
-``` 
-
 Test
 ```bash
 go test -v

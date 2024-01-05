@@ -26,7 +26,6 @@ func (qb *QueryBuilder) String() string {
 
 // Select builder
 func (qb *QueryBuilder) Select(columns ...any) *QueryBuilder {
-
 	qb.Query.Select.Columns = columns
 
 	return qb

@@ -20,7 +20,9 @@ func (s *Select) String() string {
 		for _, col := range s.Columns {
 			if _, ok := col.(string); ok { // Column type string
 				columns = append(columns, col.(string))
-			} else if _, ok := col.(*QueryBuilder); ok { // Column type is a complex query.
+			} else if _, ok := col.(FieldYear); ok { // Column type FieldYear
+				columns = append(columns, col.(FieldYear).String())
+			} else if _, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
 				selectQuery := col.(*QueryBuilder).String()
 
 				if col.(*QueryBuilder).Query.Alias == "" {
