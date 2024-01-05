@@ -13,6 +13,7 @@ type Query struct {
 	Join    Join
 	Where   Where
 	GroupBy GroupBy
+	Having  Having // A version of Where
 	OrderBy OrderBy
 	Limit   Limit
 	Fetch   Fetch // A version of Limit
@@ -37,6 +38,11 @@ func (q *Query) String() string {
 	groupSql := q.GroupBy.String()
 	if groupSql != "" {
 		query = append(query, groupSql)
+	}
+
+	havingSql := q.Having.String()
+	if havingSql != "" {
+		query = append(query, havingSql)
 	}
 
 	orderBySql := q.OrderBy.String()

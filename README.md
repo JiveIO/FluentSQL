@@ -16,10 +16,18 @@ Reference
 ## Group `Builder`
 
     QueryBuilder: SELECT - extracts data from a database
-        SQL Joins, SQL UNION, SQL HAVING, SQL CASE
-    ModifyBuilder: UPDATE - updates data in a database
-    DropBuilder: DELETE - deletes data from a database
-    AddBuilder: INSERT INTO - inserts new data into a database
+        Don't support
+            `GROUPING SETS` https://www.sqltutorial.org/sql-grouping-sets/
+            `ROLLUP` https://www.sqltutorial.org/sql-rollup/
+            `CUBE` https://www.sqltutorial.org/sql-cube/
+            `UNION` Operator https://www.sqltutorial.org/sql-union/
+            `INTERSECT` Operator https://www.sqltutorial.org/sql-intersect/
+            `MINUS` Operator https://www.sqltutorial.org/sql-minus/
+            `CASE` https://www.sqltutorial.org/sql-case/ (Working)
+
+    UpdateBuilder: UPDATE - updates data in a database
+    DeleteBuilder: DELETE - deletes data from a database
+    InsertBuilder: INSERT INTO - inserts new data into a database
 
 ## Group `Seeder and Migration`
 

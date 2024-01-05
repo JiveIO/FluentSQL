@@ -66,6 +66,18 @@ func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder 
 	return qb
 }
 
+// Having builder
+func (qb *QueryBuilder) Having(Field any, Opt WhereOpt, Value any) *QueryBuilder {
+	qb.Query.Having.Append(Condition{
+		Field: Field,
+		Opt:   Opt,
+		Value: Value,
+		AndOr: And,
+	})
+
+	return qb
+}
+
 // WhereOr builder
 func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *QueryBuilder {
 	qb.Query.Where.Append(Condition{

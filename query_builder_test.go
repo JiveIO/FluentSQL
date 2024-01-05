@@ -309,3 +309,60 @@ func TestQueryJoin(t *testing.T) {
 		}
 	}
 }
+
+// TestQueryGroupByHaving
+func TestQueryGroupByHaving(t *testing.T) {
+	testCases := map[string]*QueryBuilder{
+		"SELECT department_name, COUNT(employee_id) headcount FROM employees e INNER JOIN departments d ON d.department_id = e.department_id GROUP BY department_name": NewQueryBuilder().
+			Select("department_name", "COUNT(employee_id) headcount").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			GroupBy("department_name"),
+		"SELECT department_name, COUNT(employee_id) headcount FROM employees e INNER JOIN departments d ON d.department_id = e.department_id GROUP BY department_name HAVING headcount > 5 ORDER BY headcount DESC": NewQueryBuilder().
+			Select("department_name", "COUNT(employee_id) headcount").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			GroupBy("department_name").
+			Having("headcount", Greater, 5).
+			OrderBy("headcount", Desc),
+		"SELECT e.department_id, department_name, ROUND(AVG(salary), 2) FROM employees e INNER JOIN departments d ON d.department_id = e.department_id GROUP BY e.department_id HAVING AVG(salary) BETWEEN 5000 AND 7000 ORDER BY AVG(salary) ASC": NewQueryBuilder().
+			Select("e.department_id", "department_name", "ROUND(AVG(salary), 2)").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			GroupBy("e.department_id").
+			Having("AVG(salary)", Between, ValueBetween{
+				Low:  5000,
+				High: 7000,
+			}).
+			OrderBy("AVG(salary)", Asc),
+		"SELECT BillingDate, COUNT(*) AS BillingQty, SUM(BillingTotal) AS BillingSum FROM Billings WHERE BillingDate BETWEEN '2002-05-01' AND '2002-05-31' GROUP BY BillingDate HAVING COUNT(*) > 1 AND SUM(BillingTotal) > 100 ORDER BY BillingDate DESC": NewQueryBuilder().
+			Select("BillingDate", "COUNT(*) AS BillingQty", "SUM(BillingTotal) AS BillingSum").
+			From("Billings").
+			Where("BillingDate", Between, ValueBetween{
+				Low:  "2002-05-01",
+				High: "2002-05-31",
+			}).
+			GroupBy("BillingDate").
+			Having("COUNT(*)", Greater, 1).
+			Having("SUM(BillingTotal)", Greater, 100).
+			OrderBy("BillingDate", Desc),
+	}
+
+	for expected, query := range testCases {
+		if query.String() != expected {
+			t.Fatalf(`Query %s != %s`, query.String(), expected)
+		}
+	}
+}
