@@ -43,6 +43,17 @@ func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
 	return qb
 }
 
+// Join builder
+func (qb *QueryBuilder) Join(join JoinType, table string, condition Condition) *QueryBuilder {
+	qb.Query.Join.Append(JoinItem{
+		Join:      join,
+		Table:     table,
+		Condition: condition,
+	})
+
+	return qb
+}
+
 // Where builder
 func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder {
 	qb.Query.Where.Append(Condition{

@@ -219,3 +219,93 @@ func TestQueryAlias(t *testing.T) {
 		}
 	}
 }
+
+// TestQueryJoin
+func TestQueryJoin(t *testing.T) {
+	testCases := map[string]*QueryBuilder{
+		"SELECT first_name, last_name, employees.department_id, departments.department_id, department_name FROM employees INNER JOIN departments ON departments.department_id = employees.department_id WHERE employees.department_id IN (1, 2, 3)": NewQueryBuilder().
+			Select("first_name", "last_name", "employees.department_id", "departments.department_id", "department_name").
+			From("employees").
+			Join(InnerJoin, "departments", Condition{
+				Field: "departments.department_id",
+				Opt:   Eq,
+				Value: ValueField("employees.department_id"),
+			}).
+			Where("employees.department_id", In, []int{1, 2, 3}),
+		"SELECT first_name, last_name, job_title, department_name FROM employees e INNER JOIN departments d ON d.department_id = e.department_id INNER JOIN jobs j ON j.job_id = e.job_id WHERE e.department_id IN (1, 2, 3)": NewQueryBuilder().
+			Select("first_name", "last_name", "job_title", "department_name").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			Join(InnerJoin, "jobs j", Condition{
+				Field: "j.job_id",
+				Opt:   Eq,
+				Value: ValueField("e.job_id"),
+			}).
+			Where("e.department_id", In, []int{1, 2, 3}),
+		"SELECT c.country_name, c.country_id, l.country_id, l.street_address, l.city FROM countries c LEFT JOIN locations l ON l.country_id = c.country_id WHERE c.country_id IN ('US', 'UK', 'CN')": NewQueryBuilder().
+			Select("c.country_name", "c.country_id", "l.country_id", "l.street_address", "l.city").
+			From("countries", "c").
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("c.country_id", In, []string{"US", "UK", "CN"}),
+		"SELECT country_name FROM countries c LEFT JOIN locations l ON l.country_id = c.country_id WHERE l.location_id IS NULL ORDER BY country_name ASC": NewQueryBuilder().
+			Select("country_name").
+			From("countries", "c").
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("l.location_id", Null, nil).
+			OrderBy("country_name", Asc),
+		"SELECT r.region_name, c.country_name, l.street_address, l.city FROM regions r LEFT JOIN countries c ON c.region_id = r.region_id LEFT JOIN locations l ON l.country_id = c.country_id WHERE c.country_id IN ('US', 'UK', 'CN')": NewQueryBuilder().
+			Select("r.region_name", "c.country_name", "l.street_address", "l.city").
+			From("regions", "r").
+			Join(LeftJoin, "countries c", Condition{
+				Field: "c.region_id",
+				Opt:   Eq,
+				Value: ValueField("r.region_id"),
+			}).
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("c.country_id", In, []string{"US", "UK", "CN"}),
+		"SELECT e.first_name || ' ' || e.last_name AS employee, m.first_name || ' ' || m.last_name AS manager FROM employees e INNER JOIN employees m ON m.employee_id = e.manager_id ORDER BY manager ASC": NewQueryBuilder().
+			Select("e.first_name || ' ' || e.last_name AS employee", "m.first_name || ' ' || m.last_name AS manager").
+			From("employees", "e").
+			Join(InnerJoin, "employees m", Condition{
+				Field: "m.employee_id",
+				Opt:   Eq,
+				Value: ValueField("e.manager_id"),
+			}).
+			OrderBy("manager", Asc),
+		"SELECT basket_name, fruit_name FROM fruits FULL OUTER JOIN baskets ON baskets.basket_id = fruits.basket_id WHERE fruit_name IS NULL": NewQueryBuilder().
+			Select("basket_name", "fruit_name").
+			From("fruits").
+			Join(FullOuterJoin, "baskets", Condition{
+				Field: "baskets.basket_id",
+				Opt:   Eq,
+				Value: ValueField("fruits.basket_id"),
+			}).
+			Where("fruit_name", Null, nil),
+		"SELECT sales_org, channel FROM sales_organization CROSS JOIN sales_channel": NewQueryBuilder().
+			Select("sales_org", "channel").
+			From("sales_organization").
+			Join(CrossJoin, "sales_channel", Condition{}),
+	}
+
+	for expected, query := range testCases {
+		if query.String() != expected {
+			t.Fatalf(`Query %s != %s`, query.String(), expected)
+		}
+	}
+}

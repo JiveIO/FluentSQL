@@ -10,6 +10,7 @@ type Query struct {
 	Alias   string // Query alias `AS <alias>
 	Select  Select
 	From    From
+	Join    Join
 	Where   Where
 	GroupBy GroupBy
 	OrderBy OrderBy
@@ -22,6 +23,11 @@ func (q *Query) String() string {
 
 	query = append(query, q.Select.String())
 	query = append(query, q.From.String())
+
+	joinSql := q.Join.String()
+	if joinSql != "" {
+		query = append(query, joinSql)
+	}
 
 	whereSql := q.Where.String()
 	if whereSql != "" {
