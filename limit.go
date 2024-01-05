@@ -2,7 +2,7 @@ package fluentsql
 
 import "fmt"
 
-// Limit type struct
+// Limit clause
 type Limit struct {
 	Limit  int
 	Offset int

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Having type struct
+// Having clause
 type Having struct {
 	Where
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Where type struct
+// Where clause
 type Where struct {
 	Conditions []Condition
 }
@@ -72,37 +72,37 @@ func (c *Condition) andOr() string {
 type WhereOpt int
 
 const (
-	Eq WhereOpt = iota
-	NotEq
-	Diff
-	Greater
-	Lesser
-	GrEq
-	LeEq
-	Like
-	NotLike
-	In
-	NotIn
-	Between
-	NotBetween
-	Null
-	NotNull
-	Exists
-	NotExists
-	EqAny
-	NotEqAny
-	DiffAny
-	GreaterAny
-	LesserAny
-	GrEqAny
-	LeEqAny
-	EqAll
-	NotEqAll
-	DiffAll
-	GreaterAll
-	LesserAll
-	GrEqAll
-	LeEqAll
+	Eq         WhereOpt = iota // Comparison Operators
+	NotEq                      // Comparison Operators
+	Diff                       // Comparison Operators
+	Greater                    // Comparison Operators
+	Lesser                     // Comparison Operators
+	GrEq                       // Comparison Operators
+	LeEq                       // Comparison Operators
+	Like                       // Logical Operators
+	NotLike                    // Logical Operators
+	In                         // Logical Operators
+	NotIn                      // Logical Operators
+	Between                    // Logical Operators
+	NotBetween                 // Logical Operators
+	Null                       // Logical Operators
+	NotNull                    // Logical Operators
+	Exists                     // Logical Operators
+	NotExists                  // Logical Operators
+	EqAny                      // Comparison + Logical Operators
+	NotEqAny                   // Comparison + Logical Operators
+	DiffAny                    // Comparison + Logical Operators
+	GreaterAny                 // Comparison + Logical Operators
+	LesserAny                  // Comparison + Logical Operators
+	GrEqAny                    // Comparison + Logical Operators
+	LeEqAny                    // Comparison + Logical Operators
+	EqAll                      // Comparison + Logical Operators
+	NotEqAll                   // Comparison + Logical Operators
+	DiffAll                    // Comparison + Logical Operators
+	GreaterAll                 // Comparison + Logical Operators
+	LesserAll                  // Comparison + Logical Operators
+	GrEqAll                    // Comparison + Logical Operators
+	LeEqAll                    // Comparison + Logical Operators
 )
 
 func (c *Condition) opt() string {

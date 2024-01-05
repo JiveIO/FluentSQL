@@ -2,7 +2,7 @@ package fluentsql
 
 import "fmt"
 
-// Fetch type struct
+// Fetch clause
 type Fetch struct {
 	Fetch  int
 	Offset int

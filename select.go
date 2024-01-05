@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Select type struct
+// Select clause
 type Select struct {
 	// Columns type string or a QueryBuilder
 	Columns []any

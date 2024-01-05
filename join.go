@@ -41,6 +41,7 @@ type JoinItem struct {
 	Condition Condition
 }
 
+// Join clause
 type Join struct {
 	Items []JoinItem
 }

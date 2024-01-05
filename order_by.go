@@ -17,7 +17,7 @@ type SortItem struct {
 	Direction OrderByDir
 }
 
-// OrderBy type struct
+// OrderBy clause
 type OrderBy struct {
 	Items []SortItem
 }

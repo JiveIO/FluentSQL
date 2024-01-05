@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// From type struct
+// From clause
 type From struct {
 	Table any
 	Alias string

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// GroupBy type struct
+// GroupBy clause
 type GroupBy struct {
 	Items []string
 }
