@@ -23,7 +23,6 @@ Reference
             `UNION` Operator https://www.sqltutorial.org/sql-union/
             `INTERSECT` Operator https://www.sqltutorial.org/sql-intersect/
             `MINUS` Operator https://www.sqltutorial.org/sql-minus/
-            `CASE` https://www.sqltutorial.org/sql-case/ (Working)
 
     UpdateBuilder: UPDATE - updates data in a database
     DeleteBuilder: DELETE - deletes data from a database

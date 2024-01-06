@@ -115,7 +115,40 @@ func TestQueryFieldYear(t *testing.T) {
 }
 
 // TestQueryLikeAndInAndNotNull
-func TestQueryBetween(t *testing.T) {
+func TestQueryBetweenCase(t *testing.T) {
+
+	var conditionsLow []Condition
+	conditionsLow = append(conditionsLow, Condition{
+		Field: "salary",
+		Opt:   Lesser,
+		Value: 3000,
+	})
+
+	var conditionsAverage []Condition
+	conditionsAverage = append(conditionsAverage, Condition{
+		Field: "salary",
+		Opt:   GrEq,
+		Value: 3000,
+	})
+	conditionsAverage = append(conditionsAverage, Condition{
+		Field: "salary",
+		Opt:   LeEq,
+		Value: 5000,
+	})
+
+	var conditionsHigh []Condition
+	conditionsHigh = append(conditionsHigh, Condition{
+		Field: "salary",
+		Opt:   Greater,
+		Value: 5000,
+	})
+
+	var fieldCase *Case
+	fieldCase = FieldCase("", "evaluation")
+	fieldCase.When(conditionsLow, "Low")
+	fieldCase.When(conditionsAverage, "Average")
+	fieldCase.When(conditionsHigh, "High")
+
 	testCases := map[string]*QueryBuilder{
 		"SELECT employee_id, first_name, last_name, salary FROM employees WHERE salary NOT BETWEEN 3000 AND 5000": NewQueryBuilder().
 			Select("employee_id", "first_name", "last_name", "salary").
@@ -130,6 +163,9 @@ func TestQueryBetween(t *testing.T) {
 					High: 1993,
 				}).
 			OrderBy("hire_date", Asc),
+		"SELECT first_name, last_name, CASE  WHEN salary < 3000 THEN 'Low' WHEN salary >= 3000 AND salary <= 5000 THEN 'Average' WHEN salary > 5000 THEN 'High' END evaluation FROM employees": NewQueryBuilder().
+			Select("first_name", "last_name", fieldCase).
+			From("employees"),
 	}
 
 	for expected, query := range testCases {

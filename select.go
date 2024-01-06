@@ -18,7 +18,9 @@ func (s *Select) String() string {
 		var columns []string
 
 		for _, col := range s.Columns {
-			if _, ok := col.(string); ok { // Column type string
+			if _, ok := col.(*Case); ok { // Column type string
+				columns = append(columns, col.(*Case).String())
+			} else if _, ok := col.(string); ok { // Column type string
 				columns = append(columns, col.(string))
 			} else if _, ok := col.(FieldYear); ok { // Column type FieldYear
 				columns = append(columns, col.(FieldYear).String())

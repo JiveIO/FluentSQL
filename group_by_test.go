@@ -8,7 +8,9 @@ import (
 func TestGroupBy(t *testing.T) {
 	groupByTest := new(GroupBy)
 
-	expected := ""
+	groupByTest.Append("first_name")
+
+	expected := "GROUP BY first_name"
 
 	if groupByTest.String() != expected {
 		t.Fatalf(`Query %s != %s`, groupByTest.String(), expected)
