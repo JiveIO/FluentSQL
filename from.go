@@ -19,7 +19,7 @@ func (f *From) String() string {
 	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is QueryBuilder.
 		selectQuery := f.Table.(*QueryBuilder).String()
 
-		if f.Table.(*QueryBuilder).Query.Alias == "" {
+		if f.Table.(*QueryBuilder).alias == "" {
 			sb.WriteString(fmt.Sprintf("FROM (%s)", selectQuery))
 		} else {
 			sb.WriteString(fmt.Sprintf("FROM %s", selectQuery))

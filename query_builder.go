@@ -6,10 +6,10 @@ import (
 )
 
 // ===========================================================================================================
-//										Query structure
+//										Query Builder :: Structure
 // ===========================================================================================================
 
-// Query statement
+// QueryBuilder struct
 /*
 SELECT
     [ALL | DISTINCT | DISTINCTROW ]
@@ -44,84 +44,22 @@ into_option: {
   | INTO var_name [, var_name] ...
 }
 */
-type Query struct {
-	Alias   string // Query alias `AS <alias>
-	Select  Select
-	From    From
-	Join    Join
-	Where   Where
-	GroupBy GroupBy
-	Having  Having // A version of Where
-	OrderBy OrderBy
-	Limit   Limit
-	Fetch   Fetch // A version of Limit
-}
-
-func (q *Query) String() string {
-	var query []string
-
-	query = append(query, q.Select.String())
-	query = append(query, q.From.String())
-
-	joinSql := q.Join.String()
-	if joinSql != "" {
-		query = append(query, joinSql)
-	}
-
-	whereSql := q.Where.String()
-	if whereSql != "" {
-		query = append(query, whereSql)
-	}
-
-	groupSql := q.GroupBy.String()
-	if groupSql != "" {
-		query = append(query, groupSql)
-	}
-
-	havingSql := q.Having.String()
-	if havingSql != "" {
-		query = append(query, havingSql)
-	}
-
-	orderBySql := q.OrderBy.String()
-	if orderBySql != "" {
-		query = append(query, orderBySql)
-	}
-
-	limitSql := q.Limit.String()
-	if limitSql != "" {
-		query = append(query, limitSql)
-	}
-
-	fetchSql := q.Fetch.String()
-	if fetchSql != "" {
-		query = append(query, fetchSql)
-	}
-
-	sql := strings.Join(query, " ")
-
-	if q.Alias != "" {
-		sql = fmt.Sprintf("(%s) AS %s",
-			sql,
-			q.Alias)
-	}
-
-	return sql
-}
-
-// ===========================================================================================================
-//										Query Builder :: Structure
-// ===========================================================================================================
-
 type QueryBuilder struct {
-	Query Query
+	alias            string // Query alias `AS <alias>
+	selectStatement  Select
+	fromStatement    From
+	joinStatement    Join
+	whereStatement   Where
+	groupByStatement GroupBy
+	havingStatement  Having // A version of Where
+	orderByStatement OrderBy
+	limitStatement   Limit
+	fetchStatement   Fetch // A version of Limit
 }
 
 // NewQueryBuilder Query builder constructor
 func NewQueryBuilder() *QueryBuilder {
-	return &QueryBuilder{
-		Query: Query{},
-	}
+	return &QueryBuilder{}
 }
 
 // ===========================================================================================================
@@ -130,23 +68,71 @@ func NewQueryBuilder() *QueryBuilder {
 
 // String convert query builder to string
 func (qb *QueryBuilder) String() string {
-	return qb.Query.String()
+	var queryParts []string
+
+	queryParts = append(queryParts, qb.selectStatement.String())
+	queryParts = append(queryParts, qb.fromStatement.String())
+
+	joinSql := qb.joinStatement.String()
+	if joinSql != "" {
+		queryParts = append(queryParts, joinSql)
+	}
+
+	whereSql := qb.whereStatement.String()
+	if whereSql != "" {
+		queryParts = append(queryParts, whereSql)
+	}
+
+	groupSql := qb.groupByStatement.String()
+	if groupSql != "" {
+		queryParts = append(queryParts, groupSql)
+	}
+
+	havingSql := qb.havingStatement.String()
+	if havingSql != "" {
+		queryParts = append(queryParts, havingSql)
+	}
+
+	orderBySql := qb.orderByStatement.String()
+	if orderBySql != "" {
+		queryParts = append(queryParts, orderBySql)
+	}
+
+	limitSql := qb.limitStatement.String()
+	if limitSql != "" {
+		queryParts = append(queryParts, limitSql)
+	}
+
+	fetchSql := qb.fetchStatement.String()
+	if fetchSql != "" {
+		queryParts = append(queryParts, fetchSql)
+	}
+
+	sql := strings.Join(queryParts, " ")
+
+	if qb.alias != "" {
+		sql = fmt.Sprintf("(%s) AS %s",
+			sql,
+			qb.alias)
+	}
+
+	return sql
 }
 
 // Select builder
 func (qb *QueryBuilder) Select(columns ...any) *QueryBuilder {
-	qb.Query.Select.Columns = columns
+	qb.selectStatement.Columns = columns
 
 	return qb
 }
 
 // From builder
 func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
-	qb.Query.From.Table = table
+	qb.fromStatement.Table = table
 
 	// Table alias
 	if len(alias) > 0 {
-		qb.Query.From.Alias = alias[0]
+		qb.fromStatement.Alias = alias[0]
 	}
 
 	return qb
@@ -154,7 +140,7 @@ func (qb *QueryBuilder) From(table any, alias ...string) *QueryBuilder {
 
 // Join builder
 func (qb *QueryBuilder) Join(join JoinType, table string, condition Condition) *QueryBuilder {
-	qb.Query.Join.Append(JoinItem{
+	qb.joinStatement.Append(JoinItem{
 		Join:      join,
 		Table:     table,
 		Condition: condition,
@@ -165,7 +151,7 @@ func (qb *QueryBuilder) Join(join JoinType, table string, condition Condition) *
 
 // Where builder
 func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.Query.Where.Append(Condition{
+	qb.whereStatement.Append(Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
@@ -177,7 +163,7 @@ func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder 
 
 // Having builder
 func (qb *QueryBuilder) Having(Field any, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.Query.Having.Append(Condition{
+	qb.havingStatement.Append(Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
@@ -189,7 +175,7 @@ func (qb *QueryBuilder) Having(Field any, Opt WhereOpt, Value any) *QueryBuilder
 
 // WhereOr builder
 func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.Query.Where.Append(Condition{
+	qb.whereStatement.Append(Condition{
 		Field: Field,
 		Opt:   Opt,
 		Value: Value,
@@ -209,40 +195,40 @@ func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBui
 	whereBuilder := groupCondition(*NewQueryBuilder())
 
 	cond := Condition{
-		Group: whereBuilder.Query.Where.Conditions,
+		Group: whereBuilder.whereStatement.Conditions,
 	}
 
-	qb.Query.Where.Conditions = append(qb.Query.Where.Conditions, cond)
+	qb.whereStatement.Conditions = append(qb.whereStatement.Conditions, cond)
 
 	return qb
 }
 
 // GroupBy fields in a query
 func (qb *QueryBuilder) GroupBy(fields ...string) *QueryBuilder {
-	qb.Query.GroupBy.Append(fields...)
+	qb.groupByStatement.Append(fields...)
 
 	return qb
 }
 
 // OrderBy builder
 func (qb *QueryBuilder) OrderBy(field string, dir OrderByDir) *QueryBuilder {
-	qb.Query.OrderBy.Append(field, dir)
+	qb.orderByStatement.Append(field, dir)
 
 	return qb
 }
 
 // Limit builder
 func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
-	qb.Query.Limit.Limit = Limit
-	qb.Query.Limit.Offset = Offset
+	qb.limitStatement.Limit = Limit
+	qb.limitStatement.Offset = Offset
 
 	return qb
 }
 
 // Fetch builder
 func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
-	qb.Query.Fetch.Offset = Offset
-	qb.Query.Fetch.Fetch = Fetch
+	qb.fetchStatement.Offset = Offset
+	qb.fetchStatement.Fetch = Fetch
 
 	return qb
 }
@@ -253,7 +239,7 @@ func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
 // SELECT s.name, (SELECT COUNT(*) FROM product AS p WHERE p.store_id=s.id) AS counter FROM store AS s
 // SELECT p.* FROM (SELECT first_name, last_name FROM Customers) AS p;
 func (qb *QueryBuilder) AS(alias string) *QueryBuilder {
-	qb.Query.Alias = alias
+	qb.alias = alias
 
 	return qb
 }

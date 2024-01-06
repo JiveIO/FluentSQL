@@ -27,7 +27,7 @@ func (s *Select) String() string {
 			} else if _, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
 				selectQuery := col.(*QueryBuilder).String()
 
-				if col.(*QueryBuilder).Query.Alias == "" {
+				if col.(*QueryBuilder).alias == "" {
 					selectQuery = fmt.Sprintf("(%s)", selectQuery)
 				}
 
