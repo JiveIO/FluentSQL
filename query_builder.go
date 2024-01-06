@@ -1,5 +1,114 @@
 package fluentsql
 
+import (
+	"fmt"
+	"strings"
+)
+
+// ===========================================================================================================
+//										Query structure
+// ===========================================================================================================
+
+// Query statement
+/*
+SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+    [HIGH_PRIORITY]
+    [STRAIGHT_JOIN]
+    [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+    [SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr] ...
+    [into_option]
+    [FROM table_references
+      [PARTITION partition_list]]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [WINDOW window_name AS (window_spec)
+        [, window_name AS (window_spec)] ...]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [into_option]
+    [FOR {UPDATE | SHARE}
+        [OF tbl_name [, tbl_name] ...]
+        [NOWAIT | SKIP LOCKED]
+      | LOCK IN SHARE MODE]
+    [into_option]
+
+into_option: {
+    INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+  | INTO DUMPFILE 'file_name'
+  | INTO var_name [, var_name] ...
+}
+*/
+type Query struct {
+	Alias   string // Query alias `AS <alias>
+	Select  Select
+	From    From
+	Join    Join
+	Where   Where
+	GroupBy GroupBy
+	Having  Having // A version of Where
+	OrderBy OrderBy
+	Limit   Limit
+	Fetch   Fetch // A version of Limit
+}
+
+func (q *Query) String() string {
+	var query []string
+
+	query = append(query, q.Select.String())
+	query = append(query, q.From.String())
+
+	joinSql := q.Join.String()
+	if joinSql != "" {
+		query = append(query, joinSql)
+	}
+
+	whereSql := q.Where.String()
+	if whereSql != "" {
+		query = append(query, whereSql)
+	}
+
+	groupSql := q.GroupBy.String()
+	if groupSql != "" {
+		query = append(query, groupSql)
+	}
+
+	havingSql := q.Having.String()
+	if havingSql != "" {
+		query = append(query, havingSql)
+	}
+
+	orderBySql := q.OrderBy.String()
+	if orderBySql != "" {
+		query = append(query, orderBySql)
+	}
+
+	limitSql := q.Limit.String()
+	if limitSql != "" {
+		query = append(query, limitSql)
+	}
+
+	fetchSql := q.Fetch.String()
+	if fetchSql != "" {
+		query = append(query, fetchSql)
+	}
+
+	sql := strings.Join(query, " ")
+
+	if q.Alias != "" {
+		sql = fmt.Sprintf("(%s) AS %s",
+			sql,
+			q.Alias)
+	}
+
+	return sql
+}
+
 // ===========================================================================================================
 //										Query Builder :: Structure
 // ===========================================================================================================
