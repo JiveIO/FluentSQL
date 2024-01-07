@@ -116,7 +116,6 @@ func TestQueryFieldYear(t *testing.T) {
 
 // TestQueryLikeAndInAndNotNull
 func TestQueryBetweenCase(t *testing.T) {
-
 	var conditionsLow []Condition
 	conditionsLow = append(conditionsLow, Condition{
 		Field: "salary",
@@ -435,6 +434,182 @@ func TestQueryArgs(t *testing.T) {
 				Value: ValueField("c.country_id"),
 			}).
 			Where("c.country_id", In, []string{"US", "UK", "CN"}),
+		"SELECT department_name, COUNT(employee_id) headcount FROM employees e INNER JOIN departments d ON d.department_id = e.department_id GROUP BY department_name HAVING headcount > $1 ORDER BY headcount DESC": NewQueryBuilder().
+			Select("department_name", "COUNT(employee_id) headcount").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			GroupBy("department_name").
+			Having("headcount", Greater, 5).
+			OrderBy("headcount", Desc),
+		"SELECT e.department_id, department_name, ROUND(AVG(salary), 2) FROM employees e INNER JOIN departments d ON d.department_id = e.department_id GROUP BY e.department_id HAVING AVG(salary) BETWEEN $1 AND $2 ORDER BY AVG(salary) ASC": NewQueryBuilder().
+			Select("e.department_id", "department_name", "ROUND(AVG(salary), 2)").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			GroupBy("e.department_id").
+			Having("AVG(salary)", Between, ValueBetween{
+				Low:  5000,
+				High: 7000,
+			}).
+			OrderBy("AVG(salary)", Asc),
+		"SELECT employee_id, first_name, last_name FROM employees WHERE first_name LIKE $1 ORDER BY first_name ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name").
+			From("employees").
+			Where("first_name", Like, "Jo%").
+			OrderBy("first_name", Asc),
+		"SELECT employee_id, first_name, last_name FROM employees WHERE first_name LIKE $1 AND first_name NOT LIKE $2 ORDER BY first_name ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name").
+			From("employees").
+			Where("first_name", Like, "S%").
+			Where("first_name", NotLike, "Sh%").
+			OrderBy("first_name", Asc),
+		"SELECT employee_id, first_name, last_name, department_id FROM employees WHERE department_id IN ($1, $2) ORDER BY department_id ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "department_id").
+			From("employees").
+			Where("department_id", In, []int{8, 9}).
+			OrderBy("department_id", Asc),
+		"SELECT employee_id, first_name, last_name, hire_date FROM employees WHERE DATE_PART('year', hire_date) = $1 ORDER BY hire_date DESC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "hire_date").
+			From("employees").
+			Where(FieldYear("hire_date"), Eq, 1999).
+			OrderBy("hire_date", Desc),
+		"SELECT employee_id, first_name, last_name, DATE_PART('year', hire_date) FROM employees WHERE DATE_PART('year', hire_date) BETWEEN $1 AND $2 ORDER BY hire_date ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", FieldYear("hire_date")).
+			From("employees").
+			Where(FieldYear("hire_date"),
+				Between, ValueBetween{
+					Low:  1990,
+					High: 1993,
+				}).
+			OrderBy("hire_date", Asc),
+		"SELECT employee_id, first_name, last_name, salary FROM employees WHERE salary NOT BETWEEN $1 AND $2": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "salary").
+			Where("salary", NotBetween, ValueBetween{Low: 3000, High: 5000}).
+			From("employees"),
+		"SELECT employee_id, first_name, last_name, DATE_PART('year', hire_date) joined_year FROM employees WHERE DATE_PART('year', hire_date) BETWEEN $1 AND $2 ORDER BY hire_date ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", FieldYear("hire_date").String()+" joined_year").
+			From("employees").
+			Where(FieldYear("hire_date"),
+				Between, ValueBetween{
+					Low:  1990,
+					High: 1993,
+				}).
+			OrderBy("hire_date", Asc),
+		"SELECT employee_id, first_name, last_name, salary FROM employees WHERE salary = (SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT $1 OFFSET $2)": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "salary").
+			From("employees").
+			Where("salary", Eq,
+				NewQueryBuilder().
+					Select("DISTINCT salary").
+					From("employees").
+					OrderBy("salary", Desc).
+					Limit(1, 1),
+			),
+		"SELECT employee_id, first_name, last_name, salary FROM employees WHERE salary >= ALL (SELECT salary FROM employees WHERE department_id = $1) ORDER BY salary DESC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "salary").
+			From("employees").
+			Where("salary", GrEqAll,
+				NewQueryBuilder().
+					Select("salary").
+					From("employees").
+					Where("department_id", Eq, 8),
+			).
+			OrderBy("salary", Desc),
+		"SELECT employee_id, first_name, last_name, salary FROM employees e WHERE  EXISTS (SELECT 1 FROM dependents d WHERE d.employee_id = e.employee_id) ORDER BY first_name ASC, last_name ASC": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "salary").
+			From("employees", "e").
+			Where(FieldEmpty(""), Exists,
+				NewQueryBuilder().
+					Select("1").
+					From("dependents", "d").
+					Where("d.employee_id", Eq, ValueField("e.employee_id")),
+			).
+			OrderBy("first_name", Asc).
+			OrderBy("last_name", Asc),
+		"SELECT employee_id, first_name, last_name, salary FROM employees WHERE department_id IN (SELECT department_id FROM departments WHERE department_name = $1 OR department_name = $2)": NewQueryBuilder().
+			Select("employee_id", "first_name", "last_name", "salary").
+			From("employees").
+			Where("department_id", In,
+				NewQueryBuilder().
+					Select("department_id").
+					From("departments").
+					Where("department_name", Eq, "Marketing").
+					WhereOr("department_name", Eq, "Sales"),
+			),
+		"SELECT inv_no AS invoice_no, amount, due_date AS 'Due date', cust_no 'Customer No' FROM invoices": NewQueryBuilder().
+			Select("inv_no AS invoice_no", "amount", "due_date AS 'Due date'", "cust_no 'Customer No'").
+			From("invoices"),
+		"SELECT first_name, last_name, salary * 1.1 AS new_salary FROM employees WHERE new_salary > $1": NewQueryBuilder().
+			Select("first_name", "last_name", "salary * 1.1 AS new_salary").
+			From("employees").
+			Where("new_salary", Greater, 5000),
+		"SELECT first_name, last_name, employees.department_id, departments.department_id, department_name FROM employees INNER JOIN departments ON departments.department_id = employees.department_id WHERE employees.department_id IN ($1, $2, $3)": NewQueryBuilder().
+			Select("first_name", "last_name", "employees.department_id", "departments.department_id", "department_name").
+			From("employees").
+			Join(InnerJoin, "departments", Condition{
+				Field: "departments.department_id",
+				Opt:   Eq,
+				Value: ValueField("employees.department_id"),
+			}).
+			Where("employees.department_id", In, []int{1, 2, 3}),
+		"SELECT first_name, last_name, job_title, department_name FROM employees e INNER JOIN departments d ON d.department_id = e.department_id INNER JOIN jobs j ON j.job_id = e.job_id WHERE e.department_id IN ($1, $2, $3)": NewQueryBuilder().
+			Select("first_name", "last_name", "job_title", "department_name").
+			From("employees", "e").
+			Join(InnerJoin, "departments d", Condition{
+				Field: "d.department_id",
+				Opt:   Eq,
+				Value: ValueField("e.department_id"),
+			}).
+			Join(InnerJoin, "jobs j", Condition{
+				Field: "j.job_id",
+				Opt:   Eq,
+				Value: ValueField("e.job_id"),
+			}).
+			Where("e.department_id", In, []int{1, 2, 3}),
+		"SELECT c.country_name, c.country_id, l.country_id, l.street_address, l.city FROM countries c LEFT JOIN locations l ON l.country_id = c.country_id WHERE c.country_id IN ($1, $2, $3)": NewQueryBuilder().
+			Select("c.country_name", "c.country_id", "l.country_id", "l.street_address", "l.city").
+			From("countries", "c").
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("c.country_id", In, []string{"US", "UK", "CN"}),
+		"SELECT country_name FROM countries c LEFT JOIN locations l ON l.country_id = c.country_id WHERE l.location_id IS NULL ORDER BY country_name ASC": NewQueryBuilder().
+			Select("country_name").
+			From("countries", "c").
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("l.location_id", Null, nil).
+			OrderBy("country_name", Asc),
+		"SELECT e.first_name || ' ' || e.last_name AS employee, m.first_name || ' ' || m.last_name AS manager FROM employees e INNER JOIN employees m ON m.employee_id = e.manager_id ORDER BY manager ASC": NewQueryBuilder().
+			Select("e.first_name || ' ' || e.last_name AS employee", "m.first_name || ' ' || m.last_name AS manager").
+			From("employees", "e").
+			Join(InnerJoin, "employees m", Condition{
+				Field: "m.employee_id",
+				Opt:   Eq,
+				Value: ValueField("e.manager_id"),
+			}).
+			OrderBy("manager", Asc),
+		"SELECT basket_name, fruit_name FROM fruits FULL OUTER JOIN baskets ON baskets.basket_id = fruits.basket_id WHERE fruit_name IS NULL": NewQueryBuilder().
+			Select("basket_name", "fruit_name").
+			From("fruits").
+			Join(FullOuterJoin, "baskets", Condition{
+				Field: "baskets.basket_id",
+				Opt:   Eq,
+				Value: ValueField("fruits.basket_id"),
+			}).
+			Where("fruit_name", Null, nil),
 	}
 
 	for expected, query := range testCases {
