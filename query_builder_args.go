@@ -70,6 +70,112 @@ func (qb *QueryBuilder) StringArgs(args []any) (string, []any, error) {
 	return sqlStr, args, nil
 }
 
+func (s *Select) StringArgs(args []any) (string, []any) {
+	selectOf := "*"
+
+	if len(s.Columns) > 0 {
+		var columns []string
+
+		for _, col := range s.Columns {
+			var sqlPart string
+			if _, ok := col.(*Case); ok { // Column type string
+				sqlPart, args = col.(*Case).StringArgs(args)
+				columns = append(columns, sqlPart)
+			} else if valueString, ok := col.(string); ok { // Column type string
+				columns = append(columns, valueString)
+			} else if valueFieldYear, ok := col.(FieldYear); ok { // Column type FieldYear
+				columns = append(columns, valueFieldYear.String())
+			} else if valueQueryBuilder, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
+				var selectQuery string
+				selectQuery, args, _ = valueQueryBuilder.StringArgs(args)
+
+				if col.(*QueryBuilder).alias == "" {
+					selectQuery = fmt.Sprintf("(%s)", selectQuery)
+				}
+
+				columns = append(columns, selectQuery)
+			}
+		}
+
+		selectOf = strings.Join(columns, ", ")
+	}
+
+	return fmt.Sprintf("SELECT %s", selectOf), args
+}
+
+func (f *From) StringArgs(args []any) (string, []any) {
+	var sb strings.Builder
+
+	if _, ok := f.Table.(string); ok { // Table type string
+		sb.WriteString(fmt.Sprintf("FROM %s", f.Table))
+	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is QueryBuilder.
+		var selectQuery string
+		selectQuery, args, _ = f.Table.(*QueryBuilder).StringArgs(args)
+
+		if f.Table.(*QueryBuilder).alias == "" {
+			sb.WriteString(fmt.Sprintf("FROM (%s)", selectQuery))
+		} else {
+			sb.WriteString(fmt.Sprintf("FROM %s", selectQuery))
+		}
+	}
+
+	if f.Alias != "" {
+		sb.WriteString(" " + f.Alias)
+	}
+
+	return sb.String(), args
+}
+
+func (j *Join) StringArgs(args []any) (string, []any) {
+	if len(j.Items) == 0 {
+		return "", args
+	}
+
+	var joinItems []string
+	for _, item := range j.Items {
+		var cond string
+		cond, args = item.Condition.StringArgs(args)
+
+		joinStr := fmt.Sprintf("%s %s ON %s", item.opt(), item.Table, cond)
+
+		if item.Join == CrossJoin {
+			joinStr = fmt.Sprintf("%s %s", item.opt(), item.Table)
+		}
+
+		joinItems = append(joinItems, joinStr)
+	}
+
+	return strings.Join(joinItems, " "), args
+}
+
+func (w *Where) StringArgs(args []any) (string, []any) {
+	var conditions []string
+
+	if len(w.Conditions) > 0 {
+		for _, cond := range w.Conditions {
+			var _condition string
+			_condition, args = cond.StringArgs(args)
+
+			if cond.AndOr == Or && len(conditions) > 0 {
+				_orCondition := fmt.Sprint(" OR ", _condition)
+
+				last := len(conditions) - 1
+
+				conditions[last] = conditions[last] + _orCondition
+			} else {
+				conditions = append(conditions, _condition)
+			}
+		}
+	}
+
+	// No WHERE condition
+	if len(conditions) == 0 {
+		return "", args
+	}
+
+	return fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND ")), args
+}
+
 func (c *Condition) StringArgs(args []any) (string, []any) {
 	// Handle group conditions
 	if len(c.Group) > 0 {
@@ -97,6 +203,11 @@ func (c *Condition) StringArgs(args []any) (string, []any) {
 		}
 
 		return fmt.Sprintf("(%s)", strings.Join(conditions, " AND ")), args
+	}
+
+	// Not include value type ValueField to arguments.
+	if valueField, ok := c.Value.(ValueField); ok {
+		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), valueField), args
 	}
 
 	// WHERE Address IS NULL
@@ -168,34 +279,6 @@ func (c *Condition) StringArgs(args []any) (string, []any) {
 	return fmt.Sprintf("%s %s %s", c.Field, c.opt(), p(args)), args
 }
 
-func (w *Where) StringArgs(args []any) (string, []any) {
-	var conditions []string
-
-	if len(w.Conditions) > 0 {
-		for _, cond := range w.Conditions {
-			var _condition string
-			_condition, args = cond.StringArgs(args)
-
-			if cond.AndOr == Or && len(conditions) > 0 {
-				_orCondition := fmt.Sprint(" OR ", _condition)
-
-				last := len(conditions) - 1
-
-				conditions[last] = conditions[last] + _orCondition
-			} else {
-				conditions = append(conditions, _condition)
-			}
-		}
-	}
-
-	// No WHERE condition
-	if len(conditions) == 0 {
-		return "", args
-	}
-
-	return fmt.Sprintf("WHERE %s", strings.Join(conditions, " AND ")), args
-}
-
 func (v ValueBetween) StringArgs(args []any) (string, []any) {
 	args = append(args, v.Low)
 	pLow := p(args)
@@ -213,85 +296,12 @@ func (v FieldYear) StringArgs(args []any) (string, []any) {
 	return fmt.Sprintf("DATE_PART('year', %s)", p(args)), args
 }
 
-func (s *Select) StringArgs(args []any) (string, []any) {
-	selectOf := "*"
-
-	if len(s.Columns) > 0 {
-		var columns []string
-
-		for _, col := range s.Columns {
-			var sqlPart string
-			if _, ok := col.(*Case); ok { // Column type string
-				sqlPart, args = col.(*Case).StringArgs(args)
-				columns = append(columns, sqlPart)
-			} else if valueString, ok := col.(string); ok { // Column type string
-				columns = append(columns, valueString)
-			} else if valueFieldYear, ok := col.(FieldYear); ok { // Column type FieldYear
-				columns = append(columns, valueFieldYear.String())
-			} else if valueQueryBuilder, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
-				var selectQuery string
-				selectQuery, args, _ = valueQueryBuilder.StringArgs(args)
-
-				if col.(*QueryBuilder).alias == "" {
-					selectQuery = fmt.Sprintf("(%s)", selectQuery)
-				}
-
-				columns = append(columns, selectQuery)
-			}
-		}
-
-		selectOf = strings.Join(columns, ", ")
-	}
-
-	return fmt.Sprintf("SELECT %s", selectOf), args
-}
-
-func (o *OrderBy) StringArgs(args []any) (string, []any) {
-	if len(o.Items) == 0 {
+func (g *GroupBy) StringArgs(args []any) (string, []any) {
+	if len(g.Items) == 0 {
 		return "", args
 	}
 
-	var orderItems []string
-	for _, item := range o.Items {
-		orderItems = append(orderItems, fmt.Sprintf("%s %s", item.Field, item.Dir()))
-	}
-
-	return fmt.Sprintf("ORDER BY %s", strings.Join(orderItems, ", ")), args
-}
-
-func (l *Limit) StringArgs(args []any) (string, []any) {
-	if l.Limit > 0 || l.Offset > 0 {
-		args = append(args, l.Limit)
-		pLimit := p(args)
-		args = append(args, l.Offset)
-		pOffset := p(args)
-
-		return fmt.Sprintf("LIMIT %s OFFSET %s", pLimit, pOffset), args
-	}
-
-	return "", args
-}
-
-func (j *Join) StringArgs(args []any) (string, []any) {
-	if len(j.Items) == 0 {
-		return "", args
-	}
-
-	var joinItems []string
-	for _, item := range j.Items {
-		var cond string
-		cond, args = item.Condition.StringArgs(args)
-
-		joinStr := fmt.Sprintf("%s %s ON %s", item.opt(), item.Table, cond)
-
-		if item.Join == CrossJoin {
-			joinStr = fmt.Sprintf("%s %s", item.opt(), item.Table)
-		}
-
-		joinItems = append(joinItems, joinStr)
-	}
-
-	return strings.Join(joinItems, " "), args
+	return fmt.Sprintf("GROUP BY %s", strings.Join(g.Items, ", ")), args
 }
 
 func (w *Having) StringArgs(args []any) (string, []any) {
@@ -322,35 +332,30 @@ func (w *Having) StringArgs(args []any) (string, []any) {
 	return fmt.Sprintf("HAVING %s", strings.Join(conditions, " AND ")), args
 }
 
-func (g *GroupBy) StringArgs(args []any) (string, []any) {
-	if len(g.Items) == 0 {
+func (o *OrderBy) StringArgs(args []any) (string, []any) {
+	if len(o.Items) == 0 {
 		return "", args
 	}
 
-	return fmt.Sprintf("GROUP BY %s", strings.Join(g.Items, ", ")), args
+	var orderItems []string
+	for _, item := range o.Items {
+		orderItems = append(orderItems, fmt.Sprintf("%s %s", item.Field, item.Dir()))
+	}
+
+	return fmt.Sprintf("ORDER BY %s", strings.Join(orderItems, ", ")), args
 }
 
-func (f *From) StringArgs(args []any) (string, []any) {
-	var sb strings.Builder
+func (l *Limit) StringArgs(args []any) (string, []any) {
+	if l.Limit > 0 || l.Offset > 0 {
+		args = append(args, l.Limit)
+		pLimit := p(args)
+		args = append(args, l.Offset)
+		pOffset := p(args)
 
-	if _, ok := f.Table.(string); ok { // Table type string
-		sb.WriteString(fmt.Sprintf("FROM %s", f.Table))
-	} else if _, ok := f.Table.(*QueryBuilder); ok { // Table type is QueryBuilder.
-		var selectQuery string
-		selectQuery, args, _ = f.Table.(*QueryBuilder).StringArgs(args)
-
-		if f.Table.(*QueryBuilder).alias == "" {
-			sb.WriteString(fmt.Sprintf("FROM (%s)", selectQuery))
-		} else {
-			sb.WriteString(fmt.Sprintf("FROM %s", selectQuery))
-		}
+		return fmt.Sprintf("LIMIT %s OFFSET %s", pLimit, pOffset), args
 	}
 
-	if f.Alias != "" {
-		sb.WriteString(" " + f.Alias)
-	}
-
-	return sb.String(), args
+	return "", args
 }
 
 func (f *Fetch) StringArgs(args []any) (string, []any) {

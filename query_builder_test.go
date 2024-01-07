@@ -421,6 +421,20 @@ func TestQueryArgs(t *testing.T) {
 			Having("COUNT(*)", Greater, 1).
 			Having("SUM(BillingTotal)", Greater, 100).
 			OrderBy("BillingDate", Desc),
+		"SELECT r.region_name, c.country_name, l.street_address, l.city FROM regions r LEFT JOIN countries c ON c.region_id = r.region_id LEFT JOIN locations l ON l.country_id = c.country_id WHERE c.country_id IN ($1, $2, $3)": NewQueryBuilder().
+			Select("r.region_name", "c.country_name", "l.street_address", "l.city").
+			From("regions", "r").
+			Join(LeftJoin, "countries c", Condition{
+				Field: "c.region_id",
+				Opt:   Eq,
+				Value: ValueField("r.region_id"),
+			}).
+			Join(LeftJoin, "locations l", Condition{
+				Field: "l.country_id",
+				Opt:   Eq,
+				Value: ValueField("c.country_id"),
+			}).
+			Where("c.country_id", In, []string{"US", "UK", "CN"}),
 	}
 
 	for expected, query := range testCases {
