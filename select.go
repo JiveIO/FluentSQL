@@ -18,17 +18,17 @@ func (s *Select) String() string {
 		var columns []string
 
 		for _, col := range s.Columns {
-			if _, ok := col.(*Case); ok { // Column type string
-				columns = append(columns, col.(*Case).String())
-			} else if _, ok := col.(string); ok { // Column type string
-				columns = append(columns, col.(string))
-			} else if _, ok := col.(FieldYear); ok { // Column type FieldYear
-				columns = append(columns, col.(FieldYear).String())
-			} else if _, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
-				selectQuery := col.(*QueryBuilder).String()
+			if valueCase, ok := col.(*Case); ok { // Column type string
+				columns = append(columns, valueCase.String())
+			} else if valueString, ok := col.(string); ok { // Column type string
+				columns = append(columns, valueString)
+			} else if valueFieldYear, ok := col.(FieldYear); ok { // Column type FieldYear
+				columns = append(columns, valueFieldYear.String())
+			} else if valueQueryBuilder, ok := col.(*QueryBuilder); ok { // Column type is QueryBuilder.
+				selectQuery := valueQueryBuilder.String()
 
-				if col.(*QueryBuilder).alias == "" {
-					selectQuery = fmt.Sprintf("(%s)", selectQuery)
+				if valueQueryBuilder.alias == "" {
+					selectQuery = fmt.Sprintf("(%s)", valueQueryBuilder)
 				}
 
 				columns = append(columns, selectQuery)

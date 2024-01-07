@@ -22,10 +22,8 @@ type UpdateItem struct {
 }
 
 func (s *UpdateItem) String() string {
-	if _, ok := s.Value.(*QueryBuilder); ok { // Value type is QueryBuilder.
-		selectQuery := s.Value.(*QueryBuilder).String()
-
-		return fmt.Sprintf("%s = (%s)", s.Field, selectQuery)
+	if valueQueryBuilder, ok := s.Value.(*QueryBuilder); ok { // Value type is QueryBuilder.
+		return fmt.Sprintf("%s = (%v)", s.Field, valueQueryBuilder)
 	}
 
 	return fmt.Sprintf("%s = %s", s.Field, s.Value)

@@ -49,9 +49,9 @@ type WhenCase struct {
 }
 
 func (c *WhenCase) String() string {
-	if _, ok := c.Conditions.([]Condition); ok {
+	if valueConditions, ok := c.Conditions.([]Condition); ok {
 		var cons []string
-		for _, condition := range c.Conditions.([]Condition) {
+		for _, condition := range valueConditions {
 			cons = append(cons, condition.String())
 		}
 

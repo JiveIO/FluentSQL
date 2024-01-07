@@ -402,3 +402,37 @@ func TestQueryGroupByHaving(t *testing.T) {
 		}
 	}
 }
+
+// TestQueryArgs
+func TestQueryArgs(t *testing.T) {
+	testCases := map[string]*QueryBuilder{
+		"SELECT first_name, last_name FROM employees WHERE department_id IN (?, ?, ?)": NewQueryBuilder().
+			Select("first_name", "last_name").
+			From("employees").
+			Where("department_id", In, []int{1, 2, 3}),
+		"SELECT BillingDate, COUNT(*) AS BillingQty, SUM(BillingTotal) AS BillingSum FROM Billings WHERE BillingDate BETWEEN ? AND ? GROUP BY BillingDate HAVING COUNT(*) > ? AND SUM(BillingTotal) > ? ORDER BY BillingDate DESC": NewQueryBuilder().
+			Select("BillingDate", "COUNT(*) AS BillingQty", "SUM(BillingTotal) AS BillingSum").
+			From("Billings").
+			Where("BillingDate", Between, ValueBetween{
+				Low:  "2002-05-01",
+				High: "2002-05-31",
+			}).
+			GroupBy("BillingDate").
+			Having("COUNT(*)", Greater, 1).
+			Having("SUM(BillingTotal)", Greater, 100).
+			OrderBy("BillingDate", Desc),
+	}
+
+	for expected, query := range testCases {
+		var sql string
+		var args []any
+
+		sql, args, _ = query.StringArgs(args)
+		t.Logf("SQL> %s", sql)
+		t.Logf("		Args %v", args)
+
+		if sql != expected {
+			t.Fatalf(`Query %s != %s`, sql, expected)
+		}
+	}
+}

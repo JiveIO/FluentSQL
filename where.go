@@ -245,12 +245,12 @@ func (c *Condition) String() string {
 	// WHERE NOT EXISTS (SELECT ProductName FROM Products);
 	// WHERE ProductID = ANY (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
 	// WHERE ProductID > ALL (SELECT ProductID FROM OrderDetails WHERE Quantity = 10);
-	if _, ok := c.Value.(*QueryBuilder); ok { // Column type is a complex query.
-		return fmt.Sprintf("%s %s (%v)", c.Field, c.opt(), c.Value)
+	if valueQueryBuilder, ok := c.Value.(*QueryBuilder); ok { // Column type is a complex query.
+		return fmt.Sprintf("%s %s (%v)", c.Field, c.opt(), valueQueryBuilder)
 	}
 
-	if _, ok := c.Value.(string); ok {
-		return fmt.Sprintf("%s %s '%v'", c.Field, c.opt(), c.Value)
+	if valueString, ok := c.Value.(string); ok {
+		return fmt.Sprintf("%s %s '%v'", c.Field, c.opt(), valueString)
 	}
 
 	return fmt.Sprintf("%s %s %v", c.Field, c.opt(), c.Value)
