@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+// Sql Get Query statement and Arguments
+func (qb *QueryBuilder) Sql() (string, []any, error) {
+	var args []any
+
+	return qb.StringArgs(args)
+}
+
 // StringArgs builder
 func (qb *QueryBuilder) StringArgs(args []any) (string, []any, error) {
 	var queryParts []string
@@ -110,13 +117,13 @@ func (c *Condition) StringArgs(args []any) (string, []any) {
 			if values, ok := c.Value.([]string); ok {
 				for _, val := range values {
 					args = append(args, val)
-					valuesStr = append(valuesStr, "?")
+					valuesStr = append(valuesStr, p(args))
 				}
 			}
 			if values, ok := c.Value.([]int); ok {
 				for _, val := range values {
 					args = append(args, val)
-					valuesStr = append(valuesStr, "?")
+					valuesStr = append(valuesStr, p(args))
 				}
 			}
 
@@ -153,12 +160,12 @@ func (c *Condition) StringArgs(args []any) (string, []any) {
 	if valueString, ok := c.Value.(string); ok {
 		args = append(args, valueString)
 
-		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), "?"), args
+		return fmt.Sprintf("%s %s %s", c.Field, c.opt(), p(args)), args
 	}
 
 	args = append(args, c.Value)
 
-	return fmt.Sprintf("%s %s %s", c.Field, c.opt(), "?"), args
+	return fmt.Sprintf("%s %s %s", c.Field, c.opt(), p(args)), args
 }
 
 func (w *Where) StringArgs(args []any) (string, []any) {
@@ -190,17 +197,20 @@ func (w *Where) StringArgs(args []any) (string, []any) {
 }
 
 func (v ValueBetween) StringArgs(args []any) (string, []any) {
-	args = append(args, v.Low, v.High)
+	args = append(args, v.Low)
+	pLow := p(args)
+	args = append(args, v.High)
+	pHigh := p(args)
 
 	// hire_date BETWEEN '1999-01-01' AND '2000-12-31'
 	// salary NOT BETWEEN 2500 AND 2900
-	return fmt.Sprintf("%v AND %v", "?", "?"), args
+	return fmt.Sprintf("%v AND %v", pLow, pHigh), args
 }
 
 func (v FieldYear) StringArgs(args []any) (string, []any) {
 	args = append(args, string(v))
 
-	return fmt.Sprintf("DATE_PART('year', %s)", "?"), args
+	return fmt.Sprintf("DATE_PART('year', %s)", p(args)), args
 }
 
 func (s *Select) StringArgs(args []any) (string, []any) {
@@ -251,9 +261,12 @@ func (o *OrderBy) StringArgs(args []any) (string, []any) {
 
 func (l *Limit) StringArgs(args []any) (string, []any) {
 	if l.Limit > 0 || l.Offset > 0 {
-		args = append(args, l.Limit, l.Offset)
+		args = append(args, l.Limit)
+		pLimit := p(args)
+		args = append(args, l.Offset)
+		pOffset := p(args)
 
-		return fmt.Sprintf("LIMIT %s OFFSET %s", "?", "?"), args
+		return fmt.Sprintf("LIMIT %s OFFSET %s", pLimit, pOffset), args
 	}
 
 	return "", args
@@ -342,9 +355,12 @@ func (f *From) StringArgs(args []any) (string, []any) {
 
 func (f *Fetch) StringArgs(args []any) (string, []any) {
 	if f.Fetch > 0 || f.Offset > 0 {
-		args = append(args, f.Offset, f.Fetch)
+		args = append(args, f.Offset)
+		pOffset := p(args)
+		args = append(args, f.Fetch)
+		pFetch := p(args)
 
-		return fmt.Sprintf("OFFSET %s ROWS FETCH NEXT %s ROWS ONLY", "?", "?"), args
+		return fmt.Sprintf("OFFSET %s ROWS FETCH NEXT %s ROWS ONLY", pOffset, pFetch), args
 	}
 
 	return "", args

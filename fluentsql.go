@@ -1,12 +1,34 @@
 package fluentsql
 
+import "fmt"
+
 type Flavor int
 
 const (
 	MySQL Flavor = iota
 	PostgreSQL
 	SQLite
-	MongoDB
+)
+
+var (
+	// Question is a PlaceholderFormat instance that leaves placeholders as
+	// question marks.
+	// Use for MySQL, SQLite
+	Question = "?"
+
+	// Dollar is a PlaceholderFormat instance that replaces placeholders with
+	// dollar-prefixed positional placeholders (e.g. $1, $2, $3).
+	// Use for PostgreSQL, SQLite
+	Dollar = "$"
+
+	// Colon is a PlaceholderFormat instance that replaces placeholders with
+	// colon-prefixed positional placeholders (e.g. :1, :2, :3).
+	// Use for Oracle
+	Colon = ":"
+
+	// AtP is a PlaceholderFormat instance that replaces placeholders with
+	// "@p"-prefixed positional placeholders (e.g. @p1, @p2, @p3).
+	AtP = "@p"
 )
 
 var (
@@ -23,9 +45,21 @@ func (f Flavor) String() string {
 		return "PostgreSQL"
 	case SQLite:
 		return "SQLite"
-	case MongoDB:
-		return "MongoDB"
 	}
 
 	return "<Unknown>"
+}
+
+// p Get place holder format
+func p(args []any) string {
+	switch DBType {
+	case MySQL:
+		return Question
+	case PostgreSQL:
+		return fmt.Sprintf("%s%d", Dollar, len(args))
+	case SQLite:
+		return Question
+	}
+
+	return "#"
 }
