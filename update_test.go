@@ -24,7 +24,7 @@ func TestUpdateItem(t *testing.T) {
 	testCases := map[string]UpdateItem{
 		"first_name = e.first_name": {
 			Field: "first_name",
-			Value: "e.first_name",
+			Value: ValueField("e.first_name"),
 		},
 		"first_name = (SELECT first_name FROM users)": {
 			Field: "first_name",
@@ -44,23 +44,23 @@ func TestUpdateItem(t *testing.T) {
 // TestUpdateSet
 func TestUpdateSet(t *testing.T) {
 	testCases := map[string]UpdateSet{
-		"first_name = e.first_name, email = e.email": {
+		"SET first_name = e.first_name, email = e.email": {
 			Items: []UpdateItem{
 				{
 					Field: "first_name",
-					Value: "e.first_name",
+					Value: ValueField("e.first_name"),
 				},
 				{
 					Field: "email",
-					Value: "e.email",
+					Value: ValueField("e.email"),
 				},
 			},
 		},
-		"first_name = e.first_name, first_name = (SELECT first_name FROM users)": {
+		"SET first_name = e.first_name, first_name = (SELECT first_name FROM users)": {
 			Items: []UpdateItem{
 				{
 					Field: "first_name",
-					Value: "e.first_name",
+					Value: ValueField("e.first_name"),
 				},
 				{
 					Field: "first_name",

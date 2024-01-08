@@ -222,7 +222,7 @@ func (c *Condition) String() string {
 				valuesStr = "'" + strings.Join(values, "', '") + "'"
 			}
 			if values, ok := c.Value.([]int); ok {
-				valuesStr = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(values)), ", "), "[]")
+				valuesStr = joinSlice(values, ",")
 			}
 
 			return fmt.Sprintf("%s %s (%s)", c.Field, c.opt(), valuesStr)
