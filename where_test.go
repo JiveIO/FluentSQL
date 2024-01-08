@@ -190,7 +190,7 @@ func TestWhereSubquery(t *testing.T) {
 		"WHERE salary >= ALL (SELECT salary FROM employees WHERE department_id = 8)": {
 			Field: "salary",
 			Opt:   GrEqAll,
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("salary").
 				From("employees").
 				Where("department_id", Eq, 8),
@@ -198,7 +198,7 @@ func TestWhereSubquery(t *testing.T) {
 		"WHERE salary > ANY (SELECT AVG(salary) FROM employees GROUP BY department_id)": {
 			Field: "salary",
 			Opt:   GreaterAny,
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("AVG(salary)").
 				From("employees").
 				GroupBy("department_id"),
@@ -206,7 +206,7 @@ func TestWhereSubquery(t *testing.T) {
 		"WHERE  EXISTS (SELECT 1 FROM dependents d WHERE d.employee_id = e.employee_id)": {
 			Field: FieldEmpty(""),
 			Opt:   Exists,
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("1").
 				From("dependents", "d").
 				Where("d.employee_id", Eq, ValueField("e.employee_id")),
@@ -234,7 +234,7 @@ func TestWhereOthers(t *testing.T) {
 		"WHERE department_id IN (SELECT department_id FROM departments WHERE department_name = 'Marketing' OR department_name = 'Sales')": {
 			Field: "department_id",
 			Opt:   In,
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("department_id").
 				From("departments").
 				Where("department_name", Eq, "Marketing").
@@ -243,7 +243,7 @@ func TestWhereOthers(t *testing.T) {
 		"WHERE  NOT EXISTS (SELECT employee_id FROM dependents d WHERE d.employee_id = e.employee_id)": {
 			Field: FieldEmpty(""),
 			Opt:   NotExists,
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("employee_id").
 				From("dependents", "d").
 				Where("d.employee_id", Eq, ValueField("e.employee_id")),

@@ -25,7 +25,7 @@ Reference
 
     UpdateBuilder: UPDATE - updates data in a database
     DeleteBuilder: DELETE - deletes data from a database
-    InsertBuilder: INSERT INTO - inserts new data into a database
+    InsertBuilder: INSERT - inserts new data into a database
 
 ## Database `Seeder and Migration` (TBD)
 

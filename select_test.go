@@ -32,14 +32,14 @@ func TestMultiColumns(t *testing.T) {
 func TestColumnFromSelect(t *testing.T) {
 	selectTest := new(Select)
 
-	selectTest.Columns = []any{"user_name", NewQueryBuilder().Select("COUNT(*)").From("products").AS("counter")}
+	selectTest.Columns = []any{"user_name", QueryInstance().Select("COUNT(*)").From("products").AS("counter")}
 	expected := "SELECT user_name, (SELECT COUNT(*) FROM products) AS counter"
 
 	if selectTest.String() != expected {
 		t.Fatalf(`Query %s != %s`, selectTest.String(), expected)
 	}
 
-	selectTest.Columns = []any{"user_name", NewQueryBuilder().Select("COUNT(*)").From("products")}
+	selectTest.Columns = []any{"user_name", QueryInstance().Select("COUNT(*)").From("products")}
 	expected = "SELECT user_name, (SELECT COUNT(*) FROM products)"
 
 	if selectTest.String() != expected {

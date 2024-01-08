@@ -57,8 +57,8 @@ type QueryBuilder struct {
 	fetchStatement   Fetch // A version of Limit
 }
 
-// NewQueryBuilder Query builder constructor
-func NewQueryBuilder() *QueryBuilder {
+// QueryInstance Query builder constructor
+func QueryInstance() *QueryBuilder {
 	return &QueryBuilder{}
 }
 
@@ -192,7 +192,7 @@ type FnWhereGroupBuilder func(query QueryBuilder) *QueryBuilder
 // SQL> SELECT * FROM users WHERE first_name LIKE '%john%' AND (created_at > '2024-01-12' OR update_at >= '2024-01-12') LIMIT 10 OFFSET 0
 func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBuilder {
 	// Create new WhereBuilder
-	whereBuilder := groupCondition(*NewQueryBuilder())
+	whereBuilder := groupCondition(*QueryInstance())
 
 	cond := Condition{
 		Group: whereBuilder.whereStatement.Conditions,

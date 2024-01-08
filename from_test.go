@@ -33,14 +33,14 @@ func TestFromAlias(t *testing.T) {
 func TestFromSelect(t *testing.T) {
 	fromTest := new(From)
 
-	fromTest.Table = NewQueryBuilder().Select("COUNT(*)").From("products").AS("counter")
+	fromTest.Table = QueryInstance().Select("COUNT(*)").From("products").AS("counter")
 	expected := "FROM (SELECT COUNT(*) FROM products) AS counter"
 
 	if fromTest.String() != expected {
 		t.Fatalf(`Query %s != %s`, fromTest.String(), expected)
 	}
 
-	fromTest.Table = NewQueryBuilder().Select("COUNT(*)").From("products")
+	fromTest.Table = QueryInstance().Select("COUNT(*)").From("products")
 	fromTest.Alias = "counter"
 	expected = "FROM (SELECT COUNT(*) FROM products) counter"
 

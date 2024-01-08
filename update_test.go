@@ -28,7 +28,7 @@ func TestUpdateItem(t *testing.T) {
 		},
 		"first_name = (SELECT first_name FROM users)": {
 			Field: "first_name",
-			Value: NewQueryBuilder().
+			Value: QueryInstance().
 				Select("first_name").
 				From("users"),
 		},
@@ -64,7 +64,7 @@ func TestUpdateSet(t *testing.T) {
 				},
 				{
 					Field: "first_name",
-					Value: NewQueryBuilder().
+					Value: QueryInstance().
 						Select("first_name").
 						From("users"),
 				},
