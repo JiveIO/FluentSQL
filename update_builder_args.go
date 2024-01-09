@@ -90,7 +90,7 @@ func (s *UpdateItem) StringArgs(args []any) (string, []any) {
 
 					values = append(values, valueStr)
 				} else { // Value type is int or float.
-					args = append(args, valueString)
+					args = append(args, fieldAny)
 					valueStr := p(args)
 
 					values = append(values, valueStr)
