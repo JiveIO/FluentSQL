@@ -77,3 +77,15 @@ func (db *DeleteBuilder) Where(Field any, Opt WhereOpt, Value any) *DeleteBuilde
 
 	return db
 }
+
+// WhereOr builder
+func (db *DeleteBuilder) WhereOr(Field any, Opt WhereOpt, Value any) *DeleteBuilder {
+	db.whereStatement.Append(Condition{
+		Field: Field,
+		Opt:   Opt,
+		Value: Value,
+		AndOr: Or,
+	})
+
+	return db
+}
