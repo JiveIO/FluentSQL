@@ -2,10 +2,24 @@
 
 Fluent SQL - flexible and powerful SQL string builder for Go
 
-Unit test
+## Setup
+
+Install module 
+
 ```bash
-go test -v
-``` 
+# Latest version
+go get github.com/jiveio/fluentsql@latest
+
+# Specific version
+go get github.com/jiveio/fluentsql@v1.3.5
+```
+
+Use module
+```go
+import (
+    qb "github.com/jiveio/fluentsql"	
+)
+```
 
 ## QueryBuilder
 QueryBuilder: SELECT - extracts data from a database
