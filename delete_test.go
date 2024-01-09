@@ -5,7 +5,7 @@ import "testing"
 // TestDelete
 func TestDelete(t *testing.T) {
 	testCases := map[string]Delete{
-		"DELETE TABLE products": {
+		"DELETE FROM products": {
 			Table: "products",
 		},
 	}

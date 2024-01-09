@@ -41,7 +41,7 @@ func (db *DeleteBuilder) StringArgs(args []any) (string, []any, error) {
 
 func (u *Delete) StringArgs(args []any) (string, []any) {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("DELETE TABLE %s", u.Table))
+	sb.WriteString(fmt.Sprintf("DELETE FROM %s", u.Table))
 
 	if u.Alias != "" {
 		sb.WriteString(" " + u.Alias)

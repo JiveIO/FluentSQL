@@ -7,7 +7,7 @@ import (
 // TestDeleteTable
 func TestDeleteTable(t *testing.T) {
 	testCases := map[string]*DeleteBuilder{
-		"DELETE TABLE customers WHERE contact_name = 'Alfred Schmidt' AND city = 'Frankfurt' AND customer_id = 1": DeleteInstance().
+		"DELETE FROM customers WHERE contact_name = 'Alfred Schmidt' AND city = 'Frankfurt' AND customer_id = 1": DeleteInstance().
 			Delete("customers").
 			Where("contact_name", Eq, "Alfred Schmidt").
 			Where("city", Eq, "Frankfurt").
@@ -24,7 +24,7 @@ func TestDeleteTable(t *testing.T) {
 // TestDeleteTableArgs
 func TestDeleteTableArgs(t *testing.T) {
 	testCases := map[string]*DeleteBuilder{
-		"DELETE TABLE customers WHERE contact_name = $1 AND city = $2 AND customer_id = $3": DeleteInstance().
+		"DELETE FROM customers WHERE contact_name = $1 AND city = $2 AND customer_id = $3": DeleteInstance().
 			Delete("customers").
 			Where("contact_name", Eq, "Alfred Schmidt").
 			Where("city", Eq, "Frankfurt").
