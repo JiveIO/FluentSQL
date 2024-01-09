@@ -8,7 +8,7 @@ go test -v
 ``` 
 
 ## QueryBuilder
-    QueryBuilder: SELECT - extracts data from a database
+QueryBuilder: SELECT - extracts data from a database
 
 ```go
 import (
@@ -182,7 +182,7 @@ sql = qb.QueryInstance().
 ```
 
 ## UpdateBuilder
-    UpdateBuilder: UPDATE - updates data in a database
+UpdateBuilder: UPDATE - updates data in a database
 
 ```go
 import (
@@ -206,7 +206,7 @@ sql = qb.UpdateInstance().
 ```
 
 ## InsertBuilder
-    InsertBuilder: INSERT - inserts new data into a database
+InsertBuilder: INSERT - inserts new data into a database
 
 ```go
 import (
@@ -233,7 +233,7 @@ sql = qb.InsertInstance().
 ```
 
 ## DeleteBuilder
-    DeleteBuilder: DELETE - deletes data from a database
+DeleteBuilder: DELETE - deletes data from a database
 
 ```go
 import (
