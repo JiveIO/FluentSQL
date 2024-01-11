@@ -226,11 +226,16 @@ func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
 }
 
 // RemoveLimit builder
-func (qb *QueryBuilder) RemoveLimit() *QueryBuilder {
+func (qb *QueryBuilder) RemoveLimit() Limit {
+	var _limitStatement Limit
+
+	_limitStatement.Limit = qb.limitStatement.Limit
+	_limitStatement.Offset = qb.limitStatement.Offset
+
 	qb.limitStatement.Limit = 0
 	qb.limitStatement.Offset = 0
 
-	return qb
+	return _limitStatement
 }
 
 // Fetch builder
@@ -242,11 +247,16 @@ func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
 }
 
 // RemoveFetch builder
-func (qb *QueryBuilder) RemoveFetch() *QueryBuilder {
+func (qb *QueryBuilder) RemoveFetch() Fetch {
+	var _fetchStatement Fetch
+
+	_fetchStatement.Offset = qb.fetchStatement.Offset
+	_fetchStatement.Fetch = qb.fetchStatement.Fetch
+
 	qb.fetchStatement.Offset = 0
 	qb.fetchStatement.Fetch = 0
 
-	return qb
+	return _fetchStatement
 }
 
 // AS to create an alias of query builder,

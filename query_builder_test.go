@@ -623,3 +623,57 @@ func TestQueryArgs(t *testing.T) {
 		}
 	}
 }
+
+// TestRemoveLimit
+func TestRemoveLimit(t *testing.T) {
+	query := QueryInstance().
+		Select("salary").
+		From("employees").
+		OrderBy("salary", Desc).
+		Limit(10, 3)
+
+	limit := query.RemoveLimit()
+
+	if limit.Limit != 10 || limit.Offset != 3 {
+		t.Fatalf(`%v`, limit)
+	}
+	sqlRemoveLimit := "SELECT salary FROM employees ORDER BY salary DESC"
+	sqlLimit := "SELECT salary FROM employees ORDER BY salary DESC LIMIT 10 OFFSET 3"
+
+	if sqlRemoveLimit != query.String() {
+		t.Fatalf(`Query %s != %s`, query.String(), sqlRemoveLimit)
+	}
+
+	query.Limit(limit.Limit, limit.Offset)
+
+	if sqlLimit != query.String() {
+		t.Fatalf(`Query %s != %s`, query.String(), sqlLimit)
+	}
+}
+
+// TestRemoveFetch
+func TestRemoveFetch(t *testing.T) {
+	query := QueryInstance().
+		Select("salary").
+		From("employees").
+		OrderBy("salary", Desc).
+		Fetch(3, 10)
+
+	fetch := query.RemoveFetch()
+
+	if fetch.Fetch != 10 || fetch.Offset != 3 {
+		t.Fatalf(`%v`, fetch)
+	}
+	sqlRemoveLimit := "SELECT salary FROM employees ORDER BY salary DESC"
+	sqlLimit := "SELECT salary FROM employees ORDER BY salary DESC OFFSET 10 ROWS FETCH NEXT 3 ROWS ONLY"
+
+	if sqlRemoveLimit != query.String() {
+		t.Fatalf(`Query %s != %s`, query.String(), sqlRemoveLimit)
+	}
+
+	query.Fetch(fetch.Fetch, fetch.Offset)
+
+	if sqlLimit != query.String() {
+		t.Fatalf(`Query %s != %s`, query.String(), sqlLimit)
+	}
+}
