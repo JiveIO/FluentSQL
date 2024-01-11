@@ -225,10 +225,26 @@ func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
 	return qb
 }
 
+// RemoveLimit builder
+func (qb *QueryBuilder) RemoveLimit() *QueryBuilder {
+	qb.limitStatement.Limit = 0
+	qb.limitStatement.Offset = 0
+
+	return qb
+}
+
 // Fetch builder
 func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
 	qb.fetchStatement.Offset = Offset
 	qb.fetchStatement.Fetch = Fetch
+
+	return qb
+}
+
+// RemoveFetch builder
+func (qb *QueryBuilder) RemoveFetch() *QueryBuilder {
+	qb.fetchStatement.Offset = 0
+	qb.fetchStatement.Fetch = 0
 
 	return qb
 }
