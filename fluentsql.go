@@ -32,8 +32,8 @@ var (
 )
 
 var (
-	// DBType is the default flavor for all builders.
-	DBType = PostgreSQL
+	// dbType is the default flavor for all builders.
+	dbType = PostgreSQL
 )
 
 // String returns the name of f.
@@ -50,9 +50,17 @@ func (f Flavor) String() string {
 	return "<Unknown>"
 }
 
+func DBType() Flavor {
+	return dbType
+}
+
+func SetDBType(flavor Flavor) {
+	dbType = flavor
+}
+
 // p Get place holder format
 func p(args []any) string {
-	switch DBType {
+	switch dbType {
 	case MySQL:
 		return Question
 	case PostgreSQL:

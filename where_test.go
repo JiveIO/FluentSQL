@@ -248,6 +248,20 @@ func TestWhereOthers(t *testing.T) {
 				From("dependents", "d").
 				Where("d.employee_id", Eq, ValueField("e.employee_id")),
 		},
+		"WHERE department_id IN (SELECT department_id FROM departments WHERE active = true AND (department_name = 'Technical' OR department_name = 'Sales'))": {
+			Field: "department_id",
+			Opt:   In,
+			Value: QueryInstance().
+				Select("department_id").
+				From("departments").
+				Where("active", Eq, true).
+				WhereGroup(func(whereBuilder WhereBuilder) *WhereBuilder {
+					whereBuilder.Where("department_name", Eq, "Technical").
+						WhereOr("department_name", Eq, "Sales")
+
+					return &whereBuilder
+				}),
+		},
 	}
 
 	for expected, condition := range testCases {

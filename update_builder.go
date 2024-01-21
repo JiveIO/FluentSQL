@@ -85,13 +85,27 @@ func (ub *UpdateBuilder) Set(field any, value any) *UpdateBuilder {
 }
 
 // Where builder
-func (ub *UpdateBuilder) Where(Field any, Opt WhereOpt, Value any) *UpdateBuilder {
+func (ub *UpdateBuilder) Where(field any, opt WhereOpt, value any) *UpdateBuilder {
 	ub.whereStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: And,
 	})
+
+	return ub
+}
+
+// WhereGroup combine multi where conditions into a group.
+func (ub *UpdateBuilder) WhereGroup(groupCondition FnWhereBuilder) *UpdateBuilder {
+	// Create new WhereBuilder
+	whereBuilder := groupCondition(*WhereInstance())
+
+	cond := Condition{
+		Group: whereBuilder.whereStatement.Conditions,
+	}
+
+	ub.whereStatement.Conditions = append(ub.whereStatement.Conditions, cond)
 
 	return ub
 }

@@ -149,24 +149,24 @@ func (qb *QueryBuilder) Join(join JoinType, table string, condition Condition) *
 	return qb
 }
 
-// Where builder
-func (qb *QueryBuilder) Where(Field any, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.whereStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+// Having builder
+func (qb *QueryBuilder) Having(field any, opt WhereOpt, value any) *QueryBuilder {
+	qb.havingStatement.Append(Condition{
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: And,
 	})
 
 	return qb
 }
 
-// Having builder
-func (qb *QueryBuilder) Having(Field any, Opt WhereOpt, Value any) *QueryBuilder {
-	qb.havingStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+// Where builder
+func (qb *QueryBuilder) Where(field any, opt WhereOpt, value any) *QueryBuilder {
+	qb.whereStatement.Append(Condition{
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: And,
 	})
 
@@ -174,31 +174,36 @@ func (qb *QueryBuilder) Having(Field any, Opt WhereOpt, Value any) *QueryBuilder
 }
 
 // WhereOr builder
-func (qb *QueryBuilder) WhereOr(Field string, Opt WhereOpt, Value any) *QueryBuilder {
+func (qb *QueryBuilder) WhereOr(field any, opt WhereOpt, value any) *QueryBuilder {
 	qb.whereStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: Or,
 	})
 
 	return qb
 }
 
-type FnWhereGroupBuilder func(query QueryBuilder) *QueryBuilder
-
 // WhereGroup combine multi where conditions into a group.
 // Example: Group 2 condition created_at and update_at.
 // SQL> SELECT * FROM users WHERE first_name LIKE '%john%' AND (created_at > '2024-01-12' OR update_at >= '2024-01-12') LIMIT 10 OFFSET 0
-func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereGroupBuilder) *QueryBuilder {
+func (qb *QueryBuilder) WhereGroup(groupCondition FnWhereBuilder) *QueryBuilder {
 	// Create new WhereBuilder
-	whereBuilder := groupCondition(*QueryInstance())
+	whereBuilder := groupCondition(*WhereInstance())
 
 	cond := Condition{
 		Group: whereBuilder.whereStatement.Conditions,
 	}
 
 	qb.whereStatement.Conditions = append(qb.whereStatement.Conditions, cond)
+
+	return qb
+}
+
+// WhereCondition appends multi conditions
+func (qb *QueryBuilder) WhereCondition(conditions ...Condition) *QueryBuilder {
+	qb.whereStatement.Conditions = append(qb.whereStatement.Conditions, conditions...)
 
 	return qb
 }
@@ -218,9 +223,9 @@ func (qb *QueryBuilder) OrderBy(field string, dir OrderByDir) *QueryBuilder {
 }
 
 // Limit builder
-func (qb *QueryBuilder) Limit(Limit, Offset int) *QueryBuilder {
-	qb.limitStatement.Limit = Limit
-	qb.limitStatement.Offset = Offset
+func (qb *QueryBuilder) Limit(limit, offset int) *QueryBuilder {
+	qb.limitStatement.Limit = limit
+	qb.limitStatement.Offset = offset
 
 	return qb
 }
@@ -239,9 +244,9 @@ func (qb *QueryBuilder) RemoveLimit() Limit {
 }
 
 // Fetch builder
-func (qb *QueryBuilder) Fetch(Offset, Fetch int) *QueryBuilder {
-	qb.fetchStatement.Offset = Offset
-	qb.fetchStatement.Fetch = Fetch
+func (qb *QueryBuilder) Fetch(offset, fetch int) *QueryBuilder {
+	qb.fetchStatement.Offset = offset
+	qb.fetchStatement.Fetch = fetch
 
 	return qb
 }

@@ -52,7 +52,7 @@ type Condition struct {
 	Value any
 	// AndOr Combination type with previous condition AND, OR. Default is AND
 	AndOr WhereAndOr
-	// Group conditions in parentheses `()`.
+	// Group sub-conditions in parentheses `()`.
 	Group []Condition
 }
 
@@ -177,7 +177,7 @@ func (c *Condition) opt() string {
 }
 
 func (c *Condition) String() string {
-	// Handle group conditions
+	// Handle group conditions WhereGroup(groupCondition FnWhereBuilder)
 	if len(c.Group) > 0 {
 		var conditions []string
 
@@ -312,5 +312,12 @@ func (v FieldEmpty) String() string {
 type FieldYear string
 
 func (v FieldYear) String() string {
-	return fmt.Sprintf("DATE_PART('year', %s)", string(v))
+	if dbType == MySQL {
+		return fmt.Sprintf("YEAR(%s)", string(v))
+	} else if dbType == PostgreSQL {
+		return fmt.Sprintf("DATE_PART('year', %s)", string(v))
+	}
+
+	// SQLite https://database.guide/how-to-extract-the-day-month-and-year-from-a-date-in-sqlite/
+	return "strftime('%Y', " + string(v) + ")"
 }

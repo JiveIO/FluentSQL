@@ -177,7 +177,7 @@ func (w *Where) StringArgs(args []any) (string, []any) {
 }
 
 func (c *Condition) StringArgs(args []any) (string, []any) {
-	// Handle group conditions
+	// Handle group conditions WhereGroup(groupCondition FnWhereBuilder)
 	if len(c.Group) > 0 {
 		var conditions []string
 
@@ -292,8 +292,16 @@ func (v ValueBetween) StringArgs(args []any) (string, []any) {
 
 func (v FieldYear) StringArgs(args []any) (string, []any) {
 	args = append(args, string(v))
+	value := p(args)
 
-	return fmt.Sprintf("DATE_PART('year', %s)", p(args)), args
+	if dbType == MySQL {
+		return fmt.Sprintf("YEAR(%s)", value), args
+	} else if dbType == PostgreSQL {
+		return fmt.Sprintf("DATE_PART('year', %s)", value), args
+	}
+
+	// SQLite
+	return "strftime('%Y', ?)", args
 }
 
 func (g *GroupBy) StringArgs(args []any) (string, []any) {

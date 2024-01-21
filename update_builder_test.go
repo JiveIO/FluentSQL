@@ -90,7 +90,6 @@ func TestUpdateArgs(t *testing.T) {
 		var args []any
 
 		sql, args, _ = query.Sql()
-		//fmt.Println(args)
 
 		if sql != expected {
 			t.Fatalf(`Query %s != %s (%v)`, sql, expected, args)

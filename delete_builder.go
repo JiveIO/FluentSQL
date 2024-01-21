@@ -67,11 +67,11 @@ func (db *DeleteBuilder) Delete(table string, alias ...string) *DeleteBuilder {
 }
 
 // Where builder
-func (db *DeleteBuilder) Where(Field any, Opt WhereOpt, Value any) *DeleteBuilder {
+func (db *DeleteBuilder) Where(field any, opt WhereOpt, value any) *DeleteBuilder {
 	db.whereStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: And,
 	})
 
@@ -79,13 +79,27 @@ func (db *DeleteBuilder) Where(Field any, Opt WhereOpt, Value any) *DeleteBuilde
 }
 
 // WhereOr builder
-func (db *DeleteBuilder) WhereOr(Field any, Opt WhereOpt, Value any) *DeleteBuilder {
+func (db *DeleteBuilder) WhereOr(field any, opt WhereOpt, value any) *DeleteBuilder {
 	db.whereStatement.Append(Condition{
-		Field: Field,
-		Opt:   Opt,
-		Value: Value,
+		Field: field,
+		Opt:   opt,
+		Value: value,
 		AndOr: Or,
 	})
+
+	return db
+}
+
+// WhereGroup combine multi where conditions into a group.
+func (db *DeleteBuilder) WhereGroup(groupCondition FnWhereBuilder) *DeleteBuilder {
+	// Create new WhereBuilder
+	whereBuilder := groupCondition(*WhereInstance())
+
+	cond := Condition{
+		Group: whereBuilder.whereStatement.Conditions,
+	}
+
+	db.whereStatement.Conditions = append(db.whereStatement.Conditions, cond)
 
 	return db
 }
