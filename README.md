@@ -45,11 +45,27 @@ sql = qb.QueryInstance().
     From("employees").
     Where("salary", qb.Eq,
         qb.QueryInstance().
-        Select("DISTINCT salary").
-        From("employees").
-        OrderBy("salary", qb.Desc).
-        Limit(1, 1),
+            Select("DISTINCT salary").
+            From("employees").
+            OrderBy("salary", qb.Desc).
+            Limit(1, 1),
     ).
+    String()
+
+// ------------- Where Group -------------
+sql = qb.QueryInstance().
+    Select("employee_id", "first_name", "last_name", "salary").
+    From("employees").
+    Where("salary", qb.In, qb.ValueBetween{
+        Low:  9000,
+        High: 12000,
+    }).
+    WhereGroup(func(whereBuilder WhereBuilder) *WhereBuilder {
+        whereBuilder.Where("age", qb.Eq, 25).
+        WhereOr("work_year", qb.Eq, 10)
+
+        return &whereBuilder
+    }),
     String()
 
 // ------------- JOIN query -------------
