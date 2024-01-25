@@ -96,6 +96,18 @@ func (ub *UpdateBuilder) Where(field any, opt WhereOpt, value any) *UpdateBuilde
 	return ub
 }
 
+// WhereOr builder
+func (ub *UpdateBuilder) WhereOr(field any, opt WhereOpt, value any) *UpdateBuilder {
+	ub.whereStatement.Append(Condition{
+		Field: field,
+		Opt:   opt,
+		Value: value,
+		AndOr: Or,
+	})
+
+	return ub
+}
+
 // WhereGroup combine multi where conditions into a group.
 func (ub *UpdateBuilder) WhereGroup(groupCondition FnWhereBuilder) *UpdateBuilder {
 	// Create new WhereBuilder
