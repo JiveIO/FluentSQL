@@ -103,3 +103,10 @@ func (db *DeleteBuilder) WhereGroup(groupCondition FnWhereBuilder) *DeleteBuilde
 
 	return db
 }
+
+// WhereCondition appends multi conditions
+func (db *DeleteBuilder) WhereCondition(conditions ...Condition) *DeleteBuilder {
+	db.whereStatement.Conditions = append(db.whereStatement.Conditions, conditions...)
+
+	return db
+}

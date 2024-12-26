@@ -121,3 +121,10 @@ func (ub *UpdateBuilder) WhereGroup(groupCondition FnWhereBuilder) *UpdateBuilde
 
 	return ub
 }
+
+// WhereCondition appends multi conditions
+func (ub *UpdateBuilder) WhereCondition(conditions ...Condition) *UpdateBuilder {
+	ub.whereStatement.Conditions = append(ub.whereStatement.Conditions, conditions...)
+
+	return ub
+}
