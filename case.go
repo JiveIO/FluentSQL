@@ -27,6 +27,14 @@ Search CASE expression
    END evaluation
 */
 
+// FieldCase creates a new Case instance with the provided expression and name.
+//
+// Parameters:
+//   - exp: The expression to be evaluated in the CASE clause.
+//   - name: The alias for the CASE clause.
+//
+// Returns:
+//   - *Case: A pointer to a new Case instance.
 func FieldCase(exp, name string) *Case {
 	return &Case{
 		Exp:  exp,
@@ -34,6 +42,14 @@ func FieldCase(exp, name string) *Case {
 	}
 }
 
+// When appends a new WHEN clause to the Case instance.
+//
+// Parameters:
+//   - conditions: The condition(s) to evaluate (can be a single value, string, or a slice of Condition).
+//   - value: The value to return when the condition is met.
+//
+// Returns:
+//   - *Case: A pointer to the Case instance, for method chaining.
 func (c *Case) When(conditions any, value string) *Case {
 	c.WhenClauses = append(c.WhenClauses, WhenCase{
 		Conditions: conditions,
@@ -44,10 +60,16 @@ func (c *Case) When(conditions any, value string) *Case {
 }
 
 type WhenCase struct {
-	Conditions any // string | int | []Condition
-	Value      string
+	// Conditions represents the condition(s) evaluated in the WHEN clause. It can be a string, integer, or slice of Condition.
+	Conditions any
+	// Value represents the result to return when the conditions are met.
+	Value string
 }
 
+// String generates the SQL representation of the WHEN clause.
+//
+// Returns:
+//   - string: The SQL string of the WHEN clause.
 func (c *WhenCase) String() string {
 	if valueConditions, ok := c.Conditions.([]Condition); ok {
 		var cons []string
@@ -62,14 +84,18 @@ func (c *WhenCase) String() string {
 }
 
 type Case struct {
-	// Exp Expression
+	// Exp specifies the expression to be evaluated in the CASE statement.
 	Exp string
-	// WhenClauses expression
+	// WhenClauses is a list of WHEN clauses defined for the CASE statement.
 	WhenClauses []WhenCase
-	// Case name
+	// Name is the alias for the CASE statement.
 	Name string
 }
 
+// String generates the SQL representation of the entire CASE statement.
+//
+// Returns:
+//   - string: The SQL string of the CASE statement.
 func (c *Case) String() string {
 	var whenCases []string
 

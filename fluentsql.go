@@ -32,11 +32,12 @@ var (
 )
 
 var (
-	// dbType is the default flavor for all builders.
+	// dbType is the default flavor for all builders. It determines which SQL flavor to use for placeholder formatting.
 	dbType = PostgreSQL
 )
 
-// String returns the name of f.
+// String returns the name of the Flavor.
+// It provides a human-readable name corresponding to the Flavor value.
 func (f Flavor) String() string {
 	switch f {
 	case MySQL:
@@ -46,19 +47,33 @@ func (f Flavor) String() string {
 	case SQLite:
 		return "SQLite"
 	}
-
 	return "<Unknown>"
 }
 
+// DBType returns the current database flavor being used.
+// Output:
+//   - (Flavor): The current database flavor.
 func DBType() Flavor {
 	return dbType
 }
 
+// SetDBType sets the current database flavor for placeholder formatting.
+// Parameters:
+//   - flavor (Flavor): The database flavor to set as the current one.
 func SetDBType(flavor Flavor) {
 	dbType = flavor
 }
 
-// p Get place holder format
+// p generates the correct placeholder format based on the current database flavor.
+// Parameters:
+//   - args ([]any): A slice of arguments used to calculate the placeholder number for PostgreSQL.
+//
+// Output:
+//   - (string): The placeholder formatted string.
+//
+// Notes:
+//   - MySQL and SQLite use question marks (?) for placeholders.
+//   - PostgreSQL uses dollar-prefixed positional placeholders (e.g., $1, $2).
 func p(args []any) string {
 	switch dbType {
 	case MySQL:
@@ -68,6 +83,5 @@ func p(args []any) string {
 	case SQLite:
 		return Question
 	}
-
 	return "#"
 }
