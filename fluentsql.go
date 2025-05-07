@@ -1,15 +1,5 @@
 package fluentsql
 
-import "fmt"
-
-type Flavor int
-
-const (
-	MySQL Flavor = iota
-	PostgreSQL
-	SQLite
-)
-
 var (
 	// Question is a PlaceholderFormat instance that leaves placeholders as
 	// question marks.
@@ -32,56 +22,38 @@ var (
 )
 
 var (
-	// dbType is the default flavor for all builders. It determines which SQL flavor to use for placeholder formatting.
-	dbType = PostgreSQL
+	// defaultDialect is the default dialect for all builders. It determines which SQL dialect to use for placeholder formatting.
+	defaultDialect Dialect = new(PostgreSQLDialect)
 )
 
-// String returns the name of the Flavor.
-// It provides a human-readable name corresponding to the Flavor value.
-func (f Flavor) String() string {
-	switch f {
-	case MySQL:
-		return "MySQL"
-	case PostgreSQL:
-		return "PostgreSQL"
-	case SQLite:
-		return "SQLite"
-	}
-	return "<Unknown>"
-}
-
-// DBType returns the current database flavor being used.
+// GetDialect returns the current database dialect being used.
 // Output:
-//   - (Flavor): The current database flavor.
-func DBType() Flavor {
-	return dbType
+//   - (Dialect): The current database dialect.
+func GetDialect() Dialect {
+	return defaultDialect
 }
 
-// SetDBType sets the current database flavor for placeholder formatting.
+// SetDialect sets the current database dialect for placeholder formatting.
 // Parameters:
-//   - flavor (Flavor): The database flavor to set as the current one.
-func SetDBType(flavor Flavor) {
-	dbType = flavor
+//   - dialect (Dialect): The database dialect to set as the current one.
+func SetDialect(dialect Dialect) {
+	defaultDialect = dialect
 }
 
-// p generates the correct placeholder format based on the current database flavor.
+// ====================================================================
+// ============================ Utilities =============================
+// ====================================================================
+
+// p generates the correct placeholder format based on the current database dialect.
 // Parameters:
 //   - args ([]any): A slice of arguments used to calculate the placeholder number for PostgreSQL.
 //
 // Output:
-//   - (string): The placeholder formatted string.
+//   - (string): The placeholder-formatted string.
 //
 // Notes:
 //   - MySQL and SQLite use question marks (?) for placeholders.
 //   - PostgreSQL uses dollar-prefixed positional placeholders (e.g., $1, $2).
 func p(args []any) string {
-	switch dbType {
-	case MySQL:
-		return Question
-	case PostgreSQL:
-		return fmt.Sprintf("%s%d", Dollar, len(args))
-	case SQLite:
-		return Question
-	}
-	return "#"
+	return defaultDialect.Placeholder(len(args))
 }

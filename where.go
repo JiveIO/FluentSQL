@@ -410,16 +410,5 @@ type FieldYear string
 //   - To use as part of a WHERE clause or SELECT statement.
 //   - The generated output varies depending on the database type (MySQL, PostgreSQL, SQLite).
 func (v FieldYear) String() string {
-	switch dbType {
-	case MySQL:
-		// For MySQL: Use the YEAR() function.
-		return fmt.Sprintf("YEAR(%s)", string(v))
-	case PostgreSQL:
-		// For PostgreSQL: Use the DATE_PART('year', field) function.
-		return fmt.Sprintf("DATE_PART('year', %s)", string(v))
-	}
-
-	// For SQLite: Use strftime('%Y', field) function for year extraction.
-	// Reference: https://database.guide/how-to-extract-the-day-month-and-year-from-a-date-in-sqlite/
-	return "strftime('%Y', " + string(v) + ")"
+	return DefaultDialect().YearFunction(string(v))
 }
