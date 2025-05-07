@@ -29,25 +29,23 @@ var (
 	// Question is a PlaceholderFormat instance that leaves placeholders as
 	// question marks.
 	// Use for MySQL, SQLite
-	Question = "?"
+	question = "?"
 
 	// Dollar is a PlaceholderFormat instance that replaces placeholders with
 	// dollar-prefixed positional placeholders (e.g. $1, $2, $3).
 	// Use for PostgreSQL, SQLite
-	Dollar = "$"
+	dollar = "$"
 
-	// Colon is a PlaceholderFormat instance that replaces placeholders with
-	// colon-prefixed positional placeholders (e.g. :1, :2, :3).
-	// Use for Oracle
-	Colon = ":"
+	// ------------------------- Dialects -------------------------
 
-	// AtP is a PlaceholderFormat instance that replaces placeholders with
-	// "@p"-prefixed positional placeholders (e.g. @p1, @p2, @p3).
-	AtP = "@p"
-)
+	// MySQL is a constant representing the MySQL database type.
+	MySQL = "MySQL"
+	// PostgreSQL is a constant representing the PostgreSQL database type.
+	PostgreSQL = "PostgreSQL"
+	// SQLite is a constant representing the SQLite database type.
+	SQLite = "SQLite"
 
-var (
-	// defaultDialect is the default dialect for all builders. It determines which SQL dialect to use for placeholder formatting.
+	// defaultDialect is the default dialect. It determines which SQL dialect to use for placeholder formatting.
 	defaultDialect Dialect = new(PostgreSQLDialect)
 )
 
@@ -57,18 +55,21 @@ func DefaultDialect() Dialect {
 	return defaultDialect
 }
 
-// GetDialect returns the current database dialect being used.
-// Output:
-//   - (Dialect): The current database dialect.
-func GetDialect() Dialect {
-	return defaultDialect
-}
-
 // SetDialect sets the current database dialect for placeholder formatting.
 // Parameters:
 //   - dialect (Dialect): The database dialect to set as the current one.
 func SetDialect(dialect Dialect) {
 	defaultDialect = dialect
+}
+
+// IsDialect checks if the current dialect matches the specified dialect name.
+// Parameters:
+//   - dialectName (string): The name of the dialect to check (e.g., "MySQL", "PostgreSQL", "SQLite")
+//
+// Returns:
+//   - bool: true if the current dialect matches the specified name, false otherwise
+func IsDialect(dialectName string) bool {
+	return defaultDialect.Name() == dialectName
 }
 
 // ====================================================================
@@ -80,7 +81,7 @@ type MySQLDialect struct{}
 
 // Name returns the name of the MySQL dialect.
 func (d MySQLDialect) Name() string {
-	return "MySQL"
+	return MySQL
 }
 
 // Placeholder returns the placeholder for MySQL, which is always "?".
@@ -90,7 +91,7 @@ func (d MySQLDialect) Name() string {
 //
 // Returns a string containing the question mark placeholder.
 func (d MySQLDialect) Placeholder(_ int) string {
-	return Question
+	return question
 }
 
 // YearFunction returns the MySQL-specific function to extract the year from a date.
@@ -112,7 +113,7 @@ type PostgreSQLDialect struct{}
 
 // Name returns the name of the PostgreSQL dialect.
 func (d PostgreSQLDialect) Name() string {
-	return "PostgreSQL"
+	return PostgreSQL
 }
 
 // Placeholder returns the placeholder for PostgreSQL, which is "$n" where n is the position.
@@ -122,7 +123,7 @@ func (d PostgreSQLDialect) Name() string {
 //
 // Returns a string containing the dollar-prefixed position (e.g. "$1", "$2", etc).
 func (d PostgreSQLDialect) Placeholder(position int) string {
-	return Dollar + fmt.Sprintf("%d", position)
+	return dollar + fmt.Sprintf("%d", position)
 }
 
 // YearFunction returns the PostgreSQL-specific function to extract the year from a date.
@@ -144,7 +145,7 @@ type SQLiteDialect struct{}
 
 // Name returns the name of the SQLite dialect.
 func (d SQLiteDialect) Name() string {
-	return "SQLite"
+	return SQLite
 }
 
 // Placeholder returns the placeholder for SQLite, which is "?".
@@ -154,7 +155,7 @@ func (d SQLiteDialect) Name() string {
 //
 // Returns a string containing the question mark placeholder.
 func (d SQLiteDialect) Placeholder(_ int) string {
-	return Question
+	return question
 }
 
 // YearFunction returns the SQLite-specific function to extract the year from a date.
