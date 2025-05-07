@@ -21,19 +21,10 @@ type Dialect interface {
 	YearFunction(field string) string
 }
 
-// DefaultDialect returns the default dialect based on the global dbType.
+// DefaultDialect returns the default dialect.
 // This is for backward compatibility.
 func DefaultDialect() Dialect {
-	switch dbType {
-	case MySQL:
-		return MySQLDialect{}
-	case PostgreSQL:
-		return PostgreSQLDialect{}
-	case SQLite:
-		return SQLiteDialect{}
-	default:
-		return PostgreSQLDialect{} // Default to PostgreSQL
-	}
+	return GetDialect()
 }
 
 // ====================================================================

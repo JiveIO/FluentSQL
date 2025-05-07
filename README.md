@@ -24,6 +24,24 @@ import (
 ## QueryBuilder
 QueryBuilder: SELECT - extracts data from a database
 
+### Using with different dialects
+
+You can use the generic builders with different SQL dialects:
+
+```go
+// Create a builder with MySQL dialect
+mysqlBuilder := qb.NewQueryBuilder(qb.MySQLDialect{})
+
+// Create a builder with PostgreSQL dialect
+pgBuilder := qb.NewQueryBuilder(qb.PostgreSQLDialect{})
+
+// Create a builder with SQLite dialect
+sqliteBuilder := qb.NewQueryBuilder(qb.SQLiteDialect{})
+
+// Or use the default dialect
+defaultBuilder := qb.NewQueryBuilder()
+```
+
 ```go
 import (
     qb "github.com/jiveio/fluentsql"	

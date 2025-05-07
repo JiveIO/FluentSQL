@@ -208,9 +208,9 @@ func TestMultipleDialects(t *testing.T) {
 		t.Errorf("PostgreSQL and SQLite SQL should be different, but both are: %s", pgSQL)
 	}
 
-	// Verify that the global dbType hasn't been affected
-	originalDbType := DBType()
-	if originalDbType != PostgreSQL { // Default is PostgreSQL
-		t.Errorf("Global dbType has been changed. Expected PostgreSQL, got %v", originalDbType)
+	// Verify that the global dialect hasn't been affected
+	originalDialect := GetDialect()
+	if originalDialect.Name() != "PostgreSQL" { // Default is PostgreSQL
+		t.Errorf("Global dialect has been changed. Expected PostgreSQL, got %v", originalDialect.Name())
 	}
 }

@@ -25,7 +25,7 @@ type GenericQueryBuilder struct {
 }
 
 // NewQueryBuilder creates a new GenericQueryBuilder with the specified dialect.
-// If no dialect is provided, it uses the default dialect based on the global dbType.
+// If no dialect is provided, it uses the default dialect.
 func NewQueryBuilder(dialect ...Dialect) *GenericQueryBuilder {
 	var d Dialect
 	if len(dialect) > 0 {
@@ -60,24 +60,17 @@ func (qb *GenericQueryBuilder) Sql() (string, []any, error) {
 // StringArgs constructs the SQL query string with placeholders and its associated arguments
 // using the builder's dialect.
 func (qb *GenericQueryBuilder) StringArgs(args []any) (string, []any, error) {
-	// Save the original global dbType
-	originalDbType := dbType
+	// Save the original global dialect
+	originalDialect := GetDialect()
 
-	// Set the global dbType based on the dialect
-	switch qb.dialect.Name() {
-	case "MySQL":
-		SetDBType(MySQL)
-	case "PostgreSQL":
-		SetDBType(PostgreSQL)
-	case "SQLite":
-		SetDBType(SQLite)
-	}
+	// Set the global dialect to the builder's dialect
+	SetDialect(qb.dialect)
 
 	// Use the original QueryBuilder's StringArgs method
 	sql, args, err := qb.QueryBuilder.StringArgs(args)
 
-	// Restore the original global dbType
-	SetDBType(originalDbType)
+	// Restore the original global dialect
+	SetDialect(originalDialect)
 
 	return sql, args, err
 }
@@ -93,7 +86,7 @@ type GenericInsertBuilder struct {
 }
 
 // NewInsertBuilder creates a new GenericInsertBuilder with the specified dialect.
-// If no dialect is provided, it uses the default dialect based on the global dbType.
+// If no dialect is provided, it uses the default dialect.
 func NewInsertBuilder(dialect ...Dialect) *GenericInsertBuilder {
 	var d Dialect
 	if len(dialect) > 0 {
@@ -128,24 +121,17 @@ func (ib *GenericInsertBuilder) Sql() (string, []any, error) {
 // StringArgs constructs the SQL query string with placeholders and its associated arguments
 // using the builder's dialect.
 func (ib *GenericInsertBuilder) StringArgs(args []any) (string, []any, error) {
-	// Save the original global dbType
-	originalDbType := dbType
+	// Save the original global dialect
+	originalDialect := GetDialect()
 
-	// Set the global dbType based on the dialect
-	switch ib.dialect.Name() {
-	case "MySQL":
-		SetDBType(MySQL)
-	case "PostgreSQL":
-		SetDBType(PostgreSQL)
-	case "SQLite":
-		SetDBType(SQLite)
-	}
+	// Set the global dialect to the builder's dialect
+	SetDialect(ib.dialect)
 
 	// Use the original InsertBuilder's StringArgs method
 	sql, args, err := ib.InsertBuilder.StringArgs(args)
 
-	// Restore the original global dbType
-	SetDBType(originalDbType)
+	// Restore the original global dialect
+	SetDialect(originalDialect)
 
 	return sql, args, err
 }
@@ -161,7 +147,7 @@ type GenericUpdateBuilder struct {
 }
 
 // NewUpdateBuilder creates a new GenericUpdateBuilder with the specified dialect.
-// If no dialect is provided, it uses the default dialect based on the global dbType.
+// If no dialect is provided, it uses the default dialect.
 func NewUpdateBuilder(dialect ...Dialect) *GenericUpdateBuilder {
 	var d Dialect
 	if len(dialect) > 0 {
@@ -189,24 +175,17 @@ func (ub *GenericUpdateBuilder) GetDialect() Dialect {
 
 // Sql constructs the SQL query string and associated arguments using the builder's dialect.
 func (ub *GenericUpdateBuilder) Sql() (string, []any, interface{}) {
-	// Save the original global dbType
-	originalDbType := dbType
+	// Save the original global dialect
+	originalDialect := GetDialect()
 
-	// Set the global dbType based on the dialect
-	switch ub.dialect.Name() {
-	case "MySQL":
-		SetDBType(MySQL)
-	case "PostgreSQL":
-		SetDBType(PostgreSQL)
-	case "SQLite":
-		SetDBType(SQLite)
-	}
+	// Set the global dialect to the builder's dialect
+	SetDialect(ub.dialect)
 
 	// Use the original UpdateBuilder's Sql method
 	sql, args, err := ub.UpdateBuilder.Sql()
 
-	// Restore the original global dbType
-	SetDBType(originalDbType)
+	// Restore the original global dialect
+	SetDialect(originalDialect)
 
 	return sql, args, err
 }
@@ -222,7 +201,7 @@ type GenericDeleteBuilder struct {
 }
 
 // NewDeleteBuilder creates a new GenericDeleteBuilder with the specified dialect.
-// If no dialect is provided, it uses the default dialect based on the global dbType.
+// If no dialect is provided, it uses the default dialect.
 func NewDeleteBuilder(dialect ...Dialect) *GenericDeleteBuilder {
 	var d Dialect
 	if len(dialect) > 0 {
@@ -257,24 +236,17 @@ func (db *GenericDeleteBuilder) Sql() (string, []any, error) {
 // StringArgs constructs the SQL query string with placeholders and its associated arguments
 // using the builder's dialect.
 func (db *GenericDeleteBuilder) StringArgs(args []any) (string, []any, error) {
-	// Save the original global dbType
-	originalDbType := dbType
+	// Save the original global dialect
+	originalDialect := GetDialect()
 
-	// Set the global dbType based on the dialect
-	switch db.dialect.Name() {
-	case "MySQL":
-		SetDBType(MySQL)
-	case "PostgreSQL":
-		SetDBType(PostgreSQL)
-	case "SQLite":
-		SetDBType(SQLite)
-	}
+	// Set the global dialect to the builder's dialect
+	SetDialect(db.dialect)
 
 	// Use the original DeleteBuilder's StringArgs method
 	sql, args, err := db.DeleteBuilder.StringArgs(args)
 
-	// Restore the original global dbType
-	SetDBType(originalDbType)
+	// Restore the original global dialect
+	SetDialect(originalDialect)
 
 	return sql, args, err
 }
