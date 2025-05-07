@@ -60,9 +60,11 @@ func (ub *UpdateBuilder) String() string {
 	var queryParts []string // Holds different parts of the SQL query.
 
 	// Add UPDATE clause to the query parts.
-	queryParts = append(queryParts, ub.updateStatement.String())
 	// Add SET clause to the query parts.
-	queryParts = append(queryParts, ub.setStatement.String())
+	queryParts = append(queryParts,
+		ub.updateStatement.String(),
+		ub.setStatement.String(),
+	)
 
 	// Add WHERE clause if available.
 	whereSql := ub.whereStatement.String()
@@ -111,7 +113,7 @@ func (ub *UpdateBuilder) Update(table any, alias ...string) *UpdateBuilder {
 // - value (any): The value to set for the column.
 // Returns:
 // - *UpdateBuilder: The current UpdateBuilder instance.
-func (ub *UpdateBuilder) Set(field any, value any) *UpdateBuilder {
+func (ub *UpdateBuilder) Set(field, value any) *UpdateBuilder {
 	ub.setStatement.Append(field, value)
 
 	return ub

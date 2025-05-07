@@ -222,7 +222,7 @@ func (w *Where) StringArgs(args []any) (string, []any) {
 				_orCondition := fmt.Sprint(" OR ", _condition)
 
 				last := len(conditions) - 1
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				conditions = append(conditions, _condition)
 			}
@@ -260,7 +260,7 @@ func (c *Condition) StringArgs(args []any) (string, []any) {
 				_orCondition := fmt.Sprint(" OR ", _condition)
 
 				last := len(conditions) - 1
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				conditions = append(conditions, _condition)
 			}
@@ -391,9 +391,10 @@ func (v FieldYear) StringArgs(args []any) (string, []any) {
 	value := p(args)
 
 	// Generate SQL based on the database type.
-	if dbType == MySQL {
+	switch dbType {
+	case MySQL:
 		return fmt.Sprintf("YEAR(%s)", value), args
-	} else if dbType == PostgreSQL {
+	case PostgreSQL:
 		return fmt.Sprintf("DATE_PART('year', %s)", value), args
 	}
 
@@ -442,7 +443,7 @@ func (w *Having) StringArgs(args []any) (string, []any) {
 				_orCondition := fmt.Sprint(" OR ", _condition)
 
 				last := len(conditions) - 1
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				conditions = append(conditions, _condition)
 			}

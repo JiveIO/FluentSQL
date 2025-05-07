@@ -61,8 +61,7 @@ func TestCaseSearch(t *testing.T) {
 		Field: "salary",
 		Opt:   GrEq,
 		Value: 3000,
-	})
-	conditionsAverage = append(conditionsAverage, Condition{
+	}, Condition{
 		Field: "salary",
 		Opt:   LeEq,
 		Value: 5000,

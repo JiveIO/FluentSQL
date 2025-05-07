@@ -97,10 +97,11 @@ func (qb *QueryBuilder) String() string {
 	var queryParts []string
 
 	// Append SELECT clause
-	queryParts = append(queryParts, qb.selectStatement.String())
-
 	// Append FROM clause
-	queryParts = append(queryParts, qb.fromStatement.String())
+	queryParts = append(queryParts,
+		qb.selectStatement.String(),
+		qb.fromStatement.String(),
+	)
 
 	// Append JOIN clauses
 	joinSql := qb.joinStatement.String()

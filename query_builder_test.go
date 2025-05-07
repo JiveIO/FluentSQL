@@ -128,8 +128,7 @@ func TestQueryBetweenCase(t *testing.T) {
 		Field: "salary",
 		Opt:   GrEq,
 		Value: 3000,
-	})
-	conditionsAverage = append(conditionsAverage, Condition{
+	}, Condition{
 		Field: "salary",
 		Opt:   LeEq,
 		Value: 5000,
@@ -142,8 +141,7 @@ func TestQueryBetweenCase(t *testing.T) {
 		Value: 5000,
 	})
 
-	var fieldCase *Case
-	fieldCase = FieldCase("", "evaluation")
+	fieldCase := FieldCase("", "evaluation")
 	fieldCase.When(conditionsLow, "Low")
 	fieldCase.When(conditionsAverage, "Average")
 	fieldCase.When(conditionsHigh, "High")

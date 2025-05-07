@@ -15,6 +15,17 @@ const (
 	CrossJoin
 )
 
+// JoinItem represents a single join entry in a SQL statement.
+// Fields:
+//   - Join: The type of join (e.g., InnerJoin, LeftJoin).
+//   - Table: The table name to join.
+//   - Condition: The ON clause condition for the join.
+type JoinItem struct {
+	Join      JoinType
+	Table     string
+	Condition Condition
+}
+
 // opt returns the SQL join type as a string based on the JoinType.
 // It is a method on JoinItem struct.
 //
@@ -37,17 +48,6 @@ func (j *JoinItem) opt() string {
 	}
 
 	return sign
-}
-
-// JoinItem represents a single join entry in a SQL statement.
-// Fields:
-//   - Join: The type of join (e.g., InnerJoin, LeftJoin).
-//   - Table: The table name to join.
-//   - Condition: The ON clause condition for the join.
-type JoinItem struct {
-	Join      JoinType
-	Table     string
-	Condition Condition
 }
 
 // Join represents a collection of join statements used in a SQL query.

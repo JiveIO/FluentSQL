@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+type Case struct {
+	// Exp specifies the expression to be evaluated in the CASE statement.
+	Exp string
+	// WhenClauses is a list of WHEN clauses defined for the CASE statement.
+	WhenClauses []WhenCase
+	// Name is the alias for the CASE statement.
+	Name string
+}
+
 // Case clause
 /*
 Simple CASE expression
@@ -81,15 +90,6 @@ func (c *WhenCase) String() string {
 	}
 
 	return fmt.Sprintf("WHEN %v THEN '%s'", c.Conditions, c.Value)
-}
-
-type Case struct {
-	// Exp specifies the expression to be evaluated in the CASE statement.
-	Exp string
-	// WhenClauses is a list of WHEN clauses defined for the CASE statement.
-	WhenClauses []WhenCase
-	// Name is the alias for the CASE statement.
-	Name string
 }
 
 // String generates the SQL representation of the entire CASE statement.

@@ -31,7 +31,7 @@ func (w *Having) String() string {
 				last := len(conditions) - 1 // Index of the last condition.
 
 				// Append the OR condition to the last condition.
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				// Add the current condition to the condition list.
 				conditions = append(conditions, _condition)

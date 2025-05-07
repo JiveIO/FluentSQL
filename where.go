@@ -54,7 +54,7 @@ func (w *Where) String() string {
 
 				// Modify the last condition by appending the OR condition.
 				last := len(conditions) - 1
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				// Append the current condition to the slice.
 				conditions = append(conditions, _condition)
@@ -83,28 +83,6 @@ type Condition struct {
 	AndOr WhereAndOr
 	// Group contains sub-conditions enclosed in parentheses `()`.
 	Group []Condition
-}
-
-// andOr determines the logical operator (AND or OR) based on the value of the AndOr field.
-//
-// Returns:
-//   - string: The string representation of the logical operator ("AND" or "OR").
-//
-// Usage:
-//
-//	operator := c.andOr() // Returns the logical operator for the current condition.
-func (c *Condition) andOr() string {
-	var sign string
-
-	// Determine the logical operator based on the value of AndOr.
-	switch c.AndOr {
-	case Or:
-		sign = "OR"
-	case And:
-		sign = "AND"
-	}
-
-	return sign
 }
 
 // WhereOpt defines the operators used in SQL conditions.
@@ -243,7 +221,7 @@ func (c *Condition) String() string {
 
 				// Update the last condition with the "OR" combination.
 				last := len(conditions) - 1
-				conditions[last] = conditions[last] + _orCondition
+				conditions[last] += _orCondition
 			} else {
 				// Append the condition to the list.
 				conditions = append(conditions, _condition)
@@ -432,10 +410,11 @@ type FieldYear string
 //   - To use as part of a WHERE clause or SELECT statement.
 //   - The generated output varies depending on the database type (MySQL, PostgreSQL, SQLite).
 func (v FieldYear) String() string {
-	// For MySQL: Use the YEAR() function.
-	if dbType == MySQL {
+	switch dbType {
+	case MySQL:
+		// For MySQL: Use the YEAR() function.
 		return fmt.Sprintf("YEAR(%s)", string(v))
-	} else if dbType == PostgreSQL {
+	case PostgreSQL:
 		// For PostgreSQL: Use the DATE_PART('year', field) function.
 		return fmt.Sprintf("DATE_PART('year', %s)", string(v))
 	}
