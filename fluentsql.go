@@ -1,7 +1,5 @@
 package fluentsql
 
-import "fmt"
-
 type Flavor int
 
 const (
@@ -75,13 +73,5 @@ func SetDBType(flavor Flavor) {
 //   - MySQL and SQLite use question marks (?) for placeholders.
 //   - PostgreSQL uses dollar-prefixed positional placeholders (e.g., $1, $2).
 func p(args []any) string {
-	switch dbType {
-	case MySQL:
-		return Question
-	case PostgreSQL:
-		return fmt.Sprintf("%s%d", Dollar, len(args))
-	case SQLite:
-		return Question
-	}
-	return "#"
+	return DefaultDialect().Placeholder(len(args))
 }

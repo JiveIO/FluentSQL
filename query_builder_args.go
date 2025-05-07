@@ -388,18 +388,8 @@ func (v ValueBetween) StringArgs(args []any) (string, []any) {
 func (v FieldYear) StringArgs(args []any) (string, []any) {
 	// Append the field value to arguments and get its placeholder.
 	args = append(args, string(v))
-	value := p(args)
 
-	// Generate SQL based on the database type.
-	switch dbType {
-	case MySQL:
-		return fmt.Sprintf("YEAR(%s)", value), args
-	case PostgreSQL:
-		return fmt.Sprintf("DATE_PART('year', %s)", value), args
-	}
-
-	// SQLite specific format.
-	return "strftime('%Y', ?)", args
+	return DefaultDialect().YearFunction(p(args)), args
 }
 
 // StringArgs generates the SQL GROUP BY clause string.
