@@ -8,16 +8,16 @@ Install module
 
 ```bash
 # Latest version
-go get github.com/jiveio/fluentsql@latest
+go get github.com/jivegroup/fluentsql@latest
 
 # Specific version
-go get github.com/jiveio/fluentsql@v1.3.5
+go get github.com/jivegroup/fluentsql@v1.3.5
 ```
 
 Use module
 ```go
 import (
-    qb "github.com/jiveio/fluentsql"	
+    qb "github.com/jivegroup/fluentsql"	
 )
 ```
 
@@ -26,7 +26,7 @@ QueryBuilder: SELECT - extracts data from a database
 
 ```go
 import (
-    qb "github.com/jiveio/fluentsql"	
+    qb "github.com/jivegroup/fluentsql"	
 )
 
 // ------------- Simple query -------------
@@ -216,7 +216,7 @@ UpdateBuilder: UPDATE - updates data in a database
 
 ```go
 import (
-    qb "github.com/jiveio/fluentsql"
+    qb "github.com/jivegroup/fluentsql"
 )
 
 // Simple
@@ -240,7 +240,7 @@ InsertBuilder: INSERT - inserts new data into a database
 
 ```go
 import (
-    qb "github.com/jiveio/fluentsql"
+    qb "github.com/jivegroup/fluentsql"
 )
 
 // Insert multi-rows
@@ -267,7 +267,7 @@ DeleteBuilder: DELETE - deletes data from a database
 
 ```go
 import (
-    qb "github.com/jiveio/fluentsql"
+    qb "github.com/jivegroup/fluentsql"
 )
 
 sql := qb.DeleteInstance().
